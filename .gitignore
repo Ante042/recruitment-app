@@ -6,3 +6,6 @@ coverage/
 dist/
 
 localfiles/
+
+# Migration data
+backend/migrations/existing-database.sql
