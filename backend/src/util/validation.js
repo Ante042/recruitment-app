@@ -84,9 +84,99 @@ function validateLogin(data) {
   };
 }
 
+/**
+ * Validate competence data
+ * @param {Object} data - The competence data
+ * @returns {Object} { valid: boolean, errors: Array<string> }
+ */
+function validateCompetence(data) {
+  const errors = [];
+
+  if (!data.competenceId) {
+    errors.push('Competence ID is required');
+  } else if (typeof data.competenceId !== 'number' || data.competenceId <= 0) {
+    errors.push('Competence ID must be a positive number');
+  }
+
+  if (data.yearsOfExperience === undefined || data.yearsOfExperience === null) {
+    errors.push('Years of experience is required');
+  } else if (typeof data.yearsOfExperience !== 'number' || data.yearsOfExperience < 0) {
+    errors.push('Years of experience must be a non-negative number');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Validate availability data
+ * @param {Object} data - The availability data
+ * @returns {Object} { valid: boolean, errors: Array<string> }
+ */
+function validateAvailability(data) {
+  const errors = [];
+
+  if (!data.fromDate || data.fromDate.trim() === '') {
+    errors.push('From date is required');
+  } else {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(data.fromDate)) {
+      errors.push('From date must be in YYYY-MM-DD format');
+    }
+  }
+
+  if (!data.toDate || data.toDate.trim() === '') {
+    errors.push('To date is required');
+  } else {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(data.toDate)) {
+      errors.push('To date must be in YYYY-MM-DD format');
+    }
+  }
+
+  if (data.fromDate && data.toDate) {
+    const from = new Date(data.fromDate);
+    const to = new Date(data.toDate);
+    if (to < from) {
+      errors.push('To date must be equal to or after from date');
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * Validate status update data
+ * @param {Object} data - The status data
+ * @returns {Object} { valid: boolean, errors: Array<string> }
+ */
+function validateStatusUpdate(data) {
+  const errors = [];
+  const validStatuses = ['unhandled', 'accepted', 'rejected'];
+
+  if (!data.status || data.status.trim() === '') {
+    errors.push('Status is required');
+  } else if (!validStatuses.includes(data.status)) {
+    errors.push('Status must be one of: unhandled, accepted, rejected');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
 module.exports = {
   isValidEmail,
   isValidPersonNumber,
   validateRegistration,
-  validateLogin
+  validateLogin,
+  validateCompetence,
+  validateAvailability,
+  validateStatusUpdate
 };

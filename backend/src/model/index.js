@@ -2,10 +2,15 @@ const Person = require('./Person');
 const Competence = require('./Competence');
 const CompetenceProfile = require('./CompetenceProfile');
 const Availability = require('./Availability');
+const Application = require('./Application');
 
 // Person has many CompetenceProfiles and Availabilities
 Person.hasMany(CompetenceProfile, { foreignKey: 'personId' });
 Person.hasMany(Availability, { foreignKey: 'personId' });
+
+// Person has one Application
+Person.hasOne(Application, { foreignKey: 'personId' });
+Application.belongsTo(Person, { foreignKey: 'personId' });
 
 // Competence has many CompetenceProfiles
 Competence.hasMany(CompetenceProfile, { foreignKey: 'competenceId' });
@@ -21,5 +26,6 @@ module.exports = {
   Person,
   Competence,
   CompetenceProfile,
-  Availability
+  Availability,
+  Application
 };
