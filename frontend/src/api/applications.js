@@ -37,3 +37,18 @@ export const submitApplication = async () => {
   const response = await client.post('/applications');
   return response.data;
 };
+
+export const getApplications = async () => {
+  const response = await client.get('/applications');
+  return response.data;
+};
+
+export const getApplicationById = async (id) => {
+  const response = await client.get(`/applications/${id}`);
+  return response.data;
+};
+
+export const updateApplicationStatus = async (id, status) => {
+  const response = await client.patch(`/applications/${id}/status`, { status });
+  return response.data;
+};

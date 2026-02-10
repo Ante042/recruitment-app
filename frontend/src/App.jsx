@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import ApplicantDashboard from './pages/ApplicantDashboard';
 import RecruiterDashboard from './pages/RecruiterDashboard';
+import ApplicationDetail from './pages/ApplicationDetail';
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
             element={
               <ProtectedRoute role="recruiter">
                 <RecruiterDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recruiter/applications/:id"
+            element={
+              <ProtectedRoute role="recruiter">
+                <ApplicationDetail />
               </ProtectedRoute>
             }
           />
