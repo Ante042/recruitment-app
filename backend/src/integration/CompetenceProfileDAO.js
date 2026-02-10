@@ -36,7 +36,33 @@ async function findByPersonId(personId) {
   }
 }
 
+/**
+ * Delete a competence profile by ID with ownership check
+ * @param {number} competenceProfileId - The competence profile ID
+ * @param {number} personId - The person ID for ownership verification
+ * @returns {Promise<boolean>} True if deleted, false if not found
+ */
+async function deleteById(competenceProfileId, personId) {
+  try {
+    const profile = await CompetenceProfile.findOne({
+      where: {
+        competenceProfileId,
+        personId
+      }
+    });
+
+    if (!profile) return false;
+
+    await profile.destroy();
+    return true;
+  } catch (error) {
+    console.error('Error deleting competence profile:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   create,
-  findByPersonId
+  findByPersonId,
+  deleteById
 };

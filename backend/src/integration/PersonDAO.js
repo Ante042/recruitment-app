@@ -1,4 +1,5 @@
 const Person = require('../model/Person');
+const { CompetenceProfile, Competence, Availability } = require('../model');
 
 /**
  * Find a person by username
@@ -43,9 +44,29 @@ async function createPerson(personData) {
   return await Person.create(personData);
 }
 
+/**
+ * Find a person by ID with their competence profiles and availability
+ * @param {number} personId - The person ID
+ * @returns {Promise<Person|null>} The person with profiles or null if not found
+ */
+async function findByIdWithProfiles(personId) {
+  return await Person.findByPk(personId, {
+    include: [
+      {
+        model: CompetenceProfile,
+        include: [Competence]
+      },
+      {
+        model: Availability
+      }
+    ]
+  });
+}
+
 module.exports = {
   findByUsername,
   findByEmail,
   findById,
-  createPerson
+  createPerson,
+  findByIdWithProfiles
 };

@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const sequelize = require('./config/database');
 const authRoutes = require('./routes/auth');
 const applicationRoutes = require('./routes/applications');
+const personRoutes = require('./routes/person');
 require('./model');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(cookieParser());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/person', personRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Recruitment API' });

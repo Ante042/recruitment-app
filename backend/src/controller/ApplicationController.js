@@ -19,6 +19,14 @@ async function addCompetence(req, res) {
       return res.status(400).json({ errors: validation.errors });
     }
 
+    // Check if application exists and is editable
+    const existingApplication = await ApplicationDAO.findByPersonId(req.user.id);
+    if (existingApplication && existingApplication.status !== 'unhandled') {
+      return res.status(403).json({
+        error: `Application is ${existingApplication.status} and cannot be modified.`
+      });
+    }
+
     // Check if competence exists
     const competence = await CompetenceDAO.findById(competenceId);
     if (!competence) {
@@ -52,6 +60,14 @@ async function addAvailability(req, res) {
     const validation = validateAvailability({ fromDate, toDate });
     if (!validation.valid) {
       return res.status(400).json({ errors: validation.errors });
+    }
+
+    // Check if application exists and is editable
+    const existingApplication = await ApplicationDAO.findByPersonId(req.user.id);
+    if (existingApplication && existingApplication.status !== 'unhandled') {
+      return res.status(403).json({
+        error: `Application is ${existingApplication.status} and cannot be modified.`
+      });
     }
 
     // Create availability period
@@ -204,6 +220,79 @@ async function updateApplicationStatus(req, res) {
   }
 }
 
+/**
+ * Get all available competences for dropdown
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+async function getAllCompetences(req, res) {
+  try {
+    const competences = await CompetenceDAO.findAll();
+    res.json(competences);
+  } catch (error) {
+    console.error('Error getting all competences:', error);
+    res.status(500).json({ error: 'Failed to get competences' });
+  }
+}
+
+/**
+ * Delete a competence profile
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+async function deleteCompetence(req, res) {
+  try {
+    const competenceProfileId = parseInt(req.params.id);
+
+    if (isNaN(competenceProfileId)) {
+      return res.status(400).json({ error: 'Invalid competence profile ID' });
+    }
+
+    const deleted = await CompetenceProfileDAO.deleteById(
+      competenceProfileId,
+      req.user.id
+    );
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'Competence profile not found' });
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting competence:', error);
+    res.status(500).json({ error: 'Failed to delete competence' });
+  }
+}
+
+/**
+ * Delete an availability period
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+async function deleteAvailability(req, res) {
+  try {
+    const availabilityId = parseInt(req.params.id);
+
+    if (isNaN(availabilityId)) {
+      return res.status(400).json({ error: 'Invalid availability ID' });
+    }
+
+    const deleted = await AvailabilityDAO.deleteById(
+      availabilityId,
+      req.user.id
+    );
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'Availability period not found' });
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting availability:', error);
+    res.status(500).json({ error: 'Failed to delete availability' });
+  }
+}
+
 module.exports = {
   addCompetence,
   addAvailability,
@@ -211,5 +300,8 @@ module.exports = {
   getMyApplication,
   listApplications,
   getApplicationDetails,
-  updateApplicationStatus
+  updateApplicationStatus,
+  getAllCompetences,
+  deleteCompetence,
+  deleteAvailability
 };

@@ -36,7 +36,33 @@ async function findByPersonId(personId) {
   }
 }
 
+/**
+ * Delete an availability period by ID with ownership check
+ * @param {number} availabilityId - The availability ID
+ * @param {number} personId - The person ID for ownership verification
+ * @returns {Promise<boolean>} True if deleted, false if not found
+ */
+async function deleteById(availabilityId, personId) {
+  try {
+    const period = await Availability.findOne({
+      where: {
+        availabilityId,
+        personId
+      }
+    });
+
+    if (!period) return false;
+
+    await period.destroy();
+    return true;
+  } catch (error) {
+    console.error('Error deleting availability period:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   create,
-  findByPersonId
+  findByPersonId,
+  deleteById
 };

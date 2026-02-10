@@ -1,4 +1,4 @@
-const Button = ({ children, onClick, disabled = false, loading = false, type = 'button' }) => {
+const Button = ({ children, onClick, disabled = false, loading = false, type = 'button', style = {} }) => {
   return (
     <button
       type={type}
@@ -13,6 +13,7 @@ const Button = ({ children, onClick, disabled = false, loading = false, type = '
         fontSize: '1rem',
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
         width: '100%',
+        ...style,
       }}
     >
       {loading ? 'Loading...' : children}
