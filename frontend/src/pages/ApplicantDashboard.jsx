@@ -27,6 +27,7 @@ const ApplicantDashboard = () => {
   const [errors, setErrors] = useState([]);
   const [competenceForm, setCompetenceForm] = useState({ competenceId: '', yearsOfExperience: '' });
   const [availabilityForm, setAvailabilityForm] = useState({ fromDate: '', toDate: '' });
+  const [isEditing, setIsEditing] = useState(false);
 
   const loadData = async () => {
     try {
@@ -136,6 +137,7 @@ const ApplicantDashboard = () => {
 
   const isEditable = !application || application.status === 'unhandled';
   const hasSubmitted = !!application;
+  const canEdit = !hasSubmitted || (isEditable && isEditing);
   const competenceProfiles = profile?.CompetenceProfiles || [];
   const availabilityPeriods = profile?.Availabilities || [];
   const canSubmit = competenceProfiles.length > 0 && availabilityPeriods.length > 0;
@@ -177,9 +179,29 @@ const ApplicantDashboard = () => {
             <StatusBadge status={application.status} />
           </div>
           {isEditable ? (
-            <p style={{ marginTop: '1rem', color: '#666' }}>
-              You can still edit your application until a decision is made.
-            </p>
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {isEditing ? (
+                <>
+                  <p style={{ color: '#666', margin: 0 }}>You are editing your application.</p>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    style={{ all: 'unset', padding: '0.4rem 1rem', backgroundColor: '#6c757d', color: 'white', borderRadius: '4px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}
+                  >
+                    Done
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p style={{ color: '#666', margin: 0 }}>Your application is under review.</p>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    style={{ all: 'unset', padding: '0.4rem 1rem', border: '2px solid #007bff', color: '#007bff', borderRadius: '4px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}
+                  >
+                    Edit
+                  </button>
+                </>
+              )}
+            </div>
           ) : (
             <p style={{ marginTop: '1rem', color: '#666' }}>
               Application locked - no further changes allowed.
@@ -193,12 +215,12 @@ const ApplicantDashboard = () => {
         <div style={{ marginTop: '1rem' }}>
           <CompetenceList
             competenceProfiles={competenceProfiles}
-            isEditable={isEditable}
+            isEditable={canEdit}
             onRemove={handleRemoveCompetence}
           />
         </div>
 
-        {isEditable && (
+        {canEdit && (
           <form onSubmit={handleAddCompetence} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
             <h4>Add Competence</h4>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
@@ -249,12 +271,12 @@ const ApplicantDashboard = () => {
         <div style={{ marginTop: '1rem' }}>
           <AvailabilityList
             availabilityPeriods={availabilityPeriods}
-            isEditable={isEditable}
+            isEditable={canEdit}
             onRemove={handleRemoveAvailability}
           />
         </div>
 
-        {isEditable && (
+        {canEdit && (
           <form onSubmit={handleAddAvailability} style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
             <h4>Add Availability Period</h4>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
