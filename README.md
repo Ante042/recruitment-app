@@ -14,4 +14,4 @@ npm run dev
 ## Structure
 
 - `backend/` - Express API
-- `frontend/` - React app (coming soon)
+- `frontend/` - React app
