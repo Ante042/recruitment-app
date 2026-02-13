@@ -8,6 +8,9 @@ const Home = () => {
     return (
       <div style={{ textAlign: 'center', padding: '2rem' }}>
         <p>Loading...</p>
+        <p style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+          The server is hosted on Render's free plan and may take up to 50 seconds to wake up.
+        </p>
       </div>
     );
   }
