@@ -4,28 +4,31 @@ const { CompetenceProfile, Competence, Availability } = require('../model');
 /**
  * Find a person by username
  * @param {string} username - The username to search for
+ * @param {Object|null} transaction - Sequelize transaction
  * @returns {Promise<Person|null>} The person or null if not found
  */
-async function findByUsername(username) {
-  return await Person.findOne({ where: { username } });
+async function findByUsername(username, transaction = null) {
+  return await Person.findOne({ where: { username }, transaction });
 }
 
 /**
  * Find a person by email
  * @param {string} email - The email to search for
+ * @param {Object|null} transaction - Sequelize transaction
  * @returns {Promise<Person|null>} The person or null if not found
  */
-async function findByEmail(email) {
-  return await Person.findOne({ where: { email } });
+async function findByEmail(email, transaction = null) {
+  return await Person.findOne({ where: { email }, transaction });
 }
 
 /**
  * Find a person by ID
  * @param {number} id - The person ID
+ * @param {Object|null} transaction - Sequelize transaction
  * @returns {Promise<Person|null>} The person or null if not found
  */
-async function findById(id) {
-  return await Person.findByPk(id);
+async function findById(id, transaction = null) {
+  return await Person.findByPk(id, { transaction });
 }
 
 /**
@@ -40,8 +43,8 @@ async function findById(id) {
  * @param {string} personData.role - Role (applicant or recruiter)
  * @returns {Promise<Person>} The created person
  */
-async function createPerson(personData) {
-  return await Person.create(personData);
+async function createPerson(personData, transaction = null) {
+  return await Person.create(personData, { transaction });
 }
 
 /**
@@ -49,7 +52,7 @@ async function createPerson(personData) {
  * @param {number} personId - The person ID
  * @returns {Promise<Person|null>} The person with profiles or null if not found
  */
-async function findByIdWithProfiles(personId) {
+async function findByIdWithProfiles(personId, transaction = null) {
   return await Person.findByPk(personId, {
     include: [
       {
@@ -59,7 +62,8 @@ async function findByIdWithProfiles(personId) {
       {
         model: Availability
       }
-    ]
+    ],
+    transaction
   });
 }
 

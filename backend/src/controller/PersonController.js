@@ -1,4 +1,5 @@
 const PersonDAO = require('../integration/PersonDAO');
+const sequelize = require('../config/database');
 
 /**
  * Get the authenticated user's profile with competences and availability
@@ -7,7 +8,9 @@ const PersonDAO = require('../integration/PersonDAO');
  */
 async function getMyProfile(req, res) {
   try {
-    const person = await PersonDAO.findByIdWithProfiles(req.user.id);
+    const person = await sequelize.transaction(async (t) => {
+      return await PersonDAO.findByIdWithProfiles(req.user.id, t);
+    });
 
     if (!person) {
       return res.status(404).json({ error: 'Profile not found' });

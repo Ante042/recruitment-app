@@ -3,6 +3,7 @@ const CompetenceDAO = require('../integration/CompetenceDAO');
 const CompetenceProfileDAO = require('../integration/CompetenceProfileDAO');
 const AvailabilityDAO = require('../integration/AvailabilityDAO');
 const { validateCompetence, validateAvailability, validateStatusUpdate } = require('../util/validation');
+const sequelize = require('../config/database');
 
 /**
  * Add a competence to the applicant's profile
@@ -13,35 +14,30 @@ async function addCompetence(req, res) {
   try {
     const { competenceId, yearsOfExperience } = req.body;
 
-    // Validate input
     const validation = validateCompetence({ competenceId, yearsOfExperience });
     if (!validation.valid) {
       return res.status(400).json({ errors: validation.errors });
     }
 
-    // Check if application exists and is editable
-    const existingApplication = await ApplicationDAO.findByPersonId(req.user.id);
-    if (existingApplication && existingApplication.status !== 'unhandled') {
-      return res.status(403).json({
-        error: `Application is ${existingApplication.status} and cannot be modified.`
-      });
-    }
+    const profile = await sequelize.transaction(async (t) => {
+      const existingApplication = await ApplicationDAO.findByPersonId(req.user.id, t);
+      if (existingApplication && existingApplication.status !== 'unhandled') {
+        throw { status: 403, error: `Application is ${existingApplication.status} and cannot be modified.` };
+      }
 
-    // Check if competence exists
-    const competence = await CompetenceDAO.findById(competenceId);
-    if (!competence) {
-      return res.status(404).json({ error: 'Competence not found' });
-    }
+      const competence = await CompetenceDAO.findById(competenceId, t);
+      if (!competence) {
+        throw { status: 404, error: 'Competence not found' };
+      }
 
-    // Create competence profile
-    const profile = await CompetenceProfileDAO.create(
-      req.user.id,
-      competenceId,
-      yearsOfExperience
-    );
+      return await CompetenceProfileDAO.create(req.user.id, competenceId, yearsOfExperience, t);
+    });
 
     res.status(201).json(profile);
   } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.error });
+    }
     console.error('Error adding competence:', error);
     res.status(500).json({ error: 'Failed to add competence' });
   }
@@ -56,29 +52,25 @@ async function addAvailability(req, res) {
   try {
     const { fromDate, toDate } = req.body;
 
-    // Validate input
     const validation = validateAvailability({ fromDate, toDate });
     if (!validation.valid) {
       return res.status(400).json({ errors: validation.errors });
     }
 
-    // Check if application exists and is editable
-    const existingApplication = await ApplicationDAO.findByPersonId(req.user.id);
-    if (existingApplication && existingApplication.status !== 'unhandled') {
-      return res.status(403).json({
-        error: `Application is ${existingApplication.status} and cannot be modified.`
-      });
-    }
+    const availability = await sequelize.transaction(async (t) => {
+      const existingApplication = await ApplicationDAO.findByPersonId(req.user.id, t);
+      if (existingApplication && existingApplication.status !== 'unhandled') {
+        throw { status: 403, error: `Application is ${existingApplication.status} and cannot be modified.` };
+      }
 
-    // Create availability period
-    const availability = await AvailabilityDAO.create(
-      req.user.id,
-      fromDate,
-      toDate
-    );
+      return await AvailabilityDAO.create(req.user.id, fromDate, toDate, t);
+    });
 
     res.status(201).json(availability);
   } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.error });
+    }
     console.error('Error adding availability:', error);
     res.status(500).json({ error: 'Failed to add availability' });
   }
@@ -93,26 +85,24 @@ async function submitApplication(req, res) {
   try {
     const personId = req.user.id;
 
-    // Check if applicant already has an application
-    const existingApplication = await ApplicationDAO.findByPersonId(personId);
-    if (existingApplication) {
-      return res.status(409).json({ error: 'Application already submitted' });
-    }
+    const application = await sequelize.transaction(async (t) => {
+      const existingApplication = await ApplicationDAO.findByPersonId(personId, t);
+      if (existingApplication) {
+        throw { status: 409, error: 'Application already submitted' };
+      }
 
-    // Verify applicant has at least one competence
-    const competences = await CompetenceProfileDAO.findByPersonId(personId);
-    if (competences.length === 0) {
-      return res.status(400).json({ error: 'At least one competence is required' });
-    }
+      const competences = await CompetenceProfileDAO.findByPersonId(personId, t);
+      if (competences.length === 0) {
+        throw { status: 400, error: 'At least one competence is required' };
+      }
 
-    // Verify applicant has at least one availability period
-    const availability = await AvailabilityDAO.findByPersonId(personId);
-    if (availability.length === 0) {
-      return res.status(400).json({ error: 'At least one availability period is required' });
-    }
+      const availability = await AvailabilityDAO.findByPersonId(personId, t);
+      if (availability.length === 0) {
+        throw { status: 400, error: 'At least one availability period is required' };
+      }
 
-    // Create application
-    const application = await ApplicationDAO.createApplication(personId);
+      return await ApplicationDAO.createApplication(personId, t);
+    });
 
     res.status(201).json({
       applicationId: application.applicationId,
@@ -120,6 +110,9 @@ async function submitApplication(req, res) {
       submittedAt: application.submittedAt
     });
   } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.error });
+    }
     console.error('Error submitting application:', error);
     res.status(500).json({ error: 'Failed to submit application' });
   }
@@ -132,7 +125,9 @@ async function submitApplication(req, res) {
  */
 async function getMyApplication(req, res) {
   try {
-    const application = await ApplicationDAO.findByPersonId(req.user.id);
+    const application = await sequelize.transaction(async (t) => {
+      return await ApplicationDAO.findByPersonId(req.user.id, t);
+    });
 
     if (!application) {
       return res.status(404).json({ error: 'Application not found' });
@@ -152,7 +147,9 @@ async function getMyApplication(req, res) {
  */
 async function listApplications(req, res) {
   try {
-    const applications = await ApplicationDAO.findAll(true);
+    const applications = await sequelize.transaction(async (t) => {
+      return await ApplicationDAO.findAll(true, t);
+    });
     res.json(applications);
   } catch (error) {
     console.error('Error listing applications:', error);
@@ -168,12 +165,13 @@ async function listApplications(req, res) {
 async function getApplicationDetails(req, res) {
   try {
     const applicationId = parseInt(req.params.id);
-
     if (isNaN(applicationId)) {
       return res.status(400).json({ error: 'Invalid application ID' });
     }
 
-    const application = await ApplicationDAO.findById(applicationId, true);
+    const application = await sequelize.transaction(async (t) => {
+      return await ApplicationDAO.findById(applicationId, true, t);
+    });
 
     if (!application) {
       return res.status(404).json({ error: 'Application not found' });
@@ -200,21 +198,24 @@ async function updateApplicationStatus(req, res) {
       return res.status(400).json({ error: 'Invalid application ID' });
     }
 
-    // Validate status
     const validation = validateStatusUpdate({ status });
     if (!validation.valid) {
       return res.status(400).json({ errors: validation.errors });
     }
 
-    // Update status
-    const application = await ApplicationDAO.updateStatus(applicationId, status);
-
-    if (!application) {
-      return res.status(404).json({ error: 'Application not found' });
-    }
+    const application = await sequelize.transaction(async (t) => {
+      const result = await ApplicationDAO.updateStatus(applicationId, status, t);
+      if (!result) {
+        throw { status: 404, error: 'Application not found' };
+      }
+      return result;
+    });
 
     res.json(application);
   } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.error });
+    }
     console.error('Error updating application status:', error);
     res.status(500).json({ error: 'Failed to update application status' });
   }
@@ -227,7 +228,9 @@ async function updateApplicationStatus(req, res) {
  */
 async function getAllCompetences(req, res) {
   try {
-    const competences = await CompetenceDAO.findAll();
+    const competences = await sequelize.transaction(async (t) => {
+      return await CompetenceDAO.findAll(t);
+    });
     res.json(competences);
   } catch (error) {
     console.error('Error getting all competences:', error);
@@ -243,15 +246,13 @@ async function getAllCompetences(req, res) {
 async function deleteCompetence(req, res) {
   try {
     const competenceProfileId = parseInt(req.params.id);
-
     if (isNaN(competenceProfileId)) {
       return res.status(400).json({ error: 'Invalid competence profile ID' });
     }
 
-    const deleted = await CompetenceProfileDAO.deleteById(
-      competenceProfileId,
-      req.user.id
-    );
+    const deleted = await sequelize.transaction(async (t) => {
+      return await CompetenceProfileDAO.deleteById(competenceProfileId, req.user.id, t);
+    });
 
     if (!deleted) {
       return res.status(404).json({ error: 'Competence profile not found' });
@@ -272,15 +273,13 @@ async function deleteCompetence(req, res) {
 async function deleteAvailability(req, res) {
   try {
     const availabilityId = parseInt(req.params.id);
-
     if (isNaN(availabilityId)) {
       return res.status(400).json({ error: 'Invalid availability ID' });
     }
 
-    const deleted = await AvailabilityDAO.deleteById(
-      availabilityId,
-      req.user.id
-    );
+    const deleted = await sequelize.transaction(async (t) => {
+      return await AvailabilityDAO.deleteById(availabilityId, req.user.id, t);
+    });
 
     if (!deleted) {
       return res.status(404).json({ error: 'Availability period not found' });

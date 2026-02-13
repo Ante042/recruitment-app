@@ -4,9 +4,9 @@ const { Competence } = require('../model');
  * Find all competences
  * @returns {Promise<Competence[]>} Array of competences
  */
-async function findAll() {
+async function findAll(transaction = null) {
   try {
-    return await Competence.findAll();
+    return await Competence.findAll({ transaction });
   } catch (error) {
     console.error('Error finding all competences:', error);
     throw error;
@@ -18,9 +18,9 @@ async function findAll() {
  * @param {number} id - The competence ID
  * @returns {Promise<Competence|null>} The competence or null
  */
-async function findById(id) {
+async function findById(id, transaction = null) {
   try {
-    return await Competence.findByPk(id);
+    return await Competence.findByPk(id, { transaction });
   } catch (error) {
     console.error('Error finding competence by ID:', error);
     throw error;

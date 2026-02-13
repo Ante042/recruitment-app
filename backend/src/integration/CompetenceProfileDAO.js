@@ -7,13 +7,13 @@ const { CompetenceProfile } = require('../model');
  * @param {number} years - Years of experience
  * @returns {Promise<CompetenceProfile>} The created competence profile
  */
-async function create(personId, competenceId, years) {
+async function create(personId, competenceId, years, transaction = null) {
   try {
     return await CompetenceProfile.create({
       personId,
       competenceId,
       yearsOfExperience: years
-    });
+    }, { transaction });
   } catch (error) {
     console.error('Error creating competence profile:', error);
     throw error;
@@ -25,10 +25,11 @@ async function create(personId, competenceId, years) {
  * @param {number} personId - The person ID
  * @returns {Promise<CompetenceProfile[]>} Array of competence profiles
  */
-async function findByPersonId(personId) {
+async function findByPersonId(personId, transaction = null) {
   try {
     return await CompetenceProfile.findAll({
-      where: { personId }
+      where: { personId },
+      transaction
     });
   } catch (error) {
     console.error('Error finding competence profiles by person ID:', error);
@@ -42,18 +43,19 @@ async function findByPersonId(personId) {
  * @param {number} personId - The person ID for ownership verification
  * @returns {Promise<boolean>} True if deleted, false if not found
  */
-async function deleteById(competenceProfileId, personId) {
+async function deleteById(competenceProfileId, personId, transaction = null) {
   try {
     const profile = await CompetenceProfile.findOne({
       where: {
         competenceProfileId,
         personId
-      }
+      },
+      transaction
     });
 
     if (!profile) return false;
 
-    await profile.destroy();
+    await profile.destroy({ transaction });
     return true;
   } catch (error) {
     console.error('Error deleting competence profile:', error);

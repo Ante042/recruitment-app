@@ -2,6 +2,7 @@ const PersonDAO = require('../integration/PersonDAO');
 const { hashPassword, comparePassword } = require('../util/password');
 const { generateToken } = require('../util/jwt');
 const { validateRegistration, validateLogin } = require('../util/validation');
+const sequelize = require('../config/database');
 
 /**
  * Register a new applicant
@@ -10,36 +11,27 @@ async function register(req, res) {
   try {
     const { firstName, lastName, email, personNumber, username, password } = req.body;
 
-    // Validate input
     const validation = validateRegistration(req.body);
     if (!validation.valid) {
       return res.status(400).json({ errors: validation.errors });
     }
 
-    // Check if username already exists
-    const existingUsername = await PersonDAO.findByUsername(username);
-    if (existingUsername) {
-      return res.status(409).json({ error: 'Username already exists' });
-    }
-
-    // Check if email already exists
-    const existingEmail = await PersonDAO.findByEmail(email);
-    if (existingEmail) {
-      return res.status(409).json({ error: 'Email already exists' });
-    }
-
-    // Hash password
     const passwordHash = await hashPassword(password);
 
-    // Create person with applicant role
-    const person = await PersonDAO.createPerson({
-      firstName,
-      lastName,
-      email,
-      personNumber,
-      username,
-      passwordHash,
-      role: 'applicant'
+    const person = await sequelize.transaction(async (t) => {
+      const existingUsername = await PersonDAO.findByUsername(username, t);
+      if (existingUsername) {
+        throw { status: 409, error: 'Username already exists' };
+      }
+
+      const existingEmail = await PersonDAO.findByEmail(email, t);
+      if (existingEmail) {
+        throw { status: 409, error: 'Email already exists' };
+      }
+
+      return await PersonDAO.createPerson({
+        firstName, lastName, email, personNumber, username, passwordHash, role: 'applicant'
+      }, t);
     });
 
     res.status(201).json({
@@ -47,6 +39,9 @@ async function register(req, res) {
       username: person.username
     });
   } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.error });
+    }
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Registration failed' });
   }
@@ -59,40 +54,37 @@ async function login(req, res) {
   try {
     const { username, password } = req.body;
 
-    // Validate input
     const validation = validateLogin(req.body);
     if (!validation.valid) {
       return res.status(400).json({ errors: validation.errors });
     }
 
-    // Find user by username
-    const person = await PersonDAO.findByUsername(username);
+    const person = await sequelize.transaction(async (t) => {
+      return await PersonDAO.findByUsername(username, t);
+    });
+
     if (!person) {
       return res.status(401).json({ error: 'Login failed' });
     }
 
-    // Verify password
     const isPasswordValid = await comparePassword(password, person.passwordHash);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Login failed' });
     }
 
-    // Generate JWT token
     const token = generateToken({
       userId: person.personId,
       username: person.username,
       role: person.role
     });
 
-    // Set HTTP-only cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 24 * 60 * 60 * 1000
     });
 
-    // Return user info (without password)
     res.status(200).json({
       user: {
         id: person.personId,

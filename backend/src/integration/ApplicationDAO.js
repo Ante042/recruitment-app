@@ -5,12 +5,12 @@ const { Application, Person, CompetenceProfile, Competence, Availability } = req
  * @param {number} personId - The person ID
  * @returns {Promise<Application>} The created application
  */
-async function createApplication(personId) {
+async function createApplication(personId, transaction = null) {
   try {
     return await Application.create({
       personId,
       status: 'unhandled'
-    });
+    }, { transaction });
   } catch (error) {
     console.error('Error creating application:', error);
     throw error;
@@ -23,9 +23,9 @@ async function createApplication(personId) {
  * @param {boolean} includeRelations - Whether to include related data
  * @returns {Promise<Application|null>} The application or null
  */
-async function findById(id, includeRelations = false) {
+async function findById(id, includeRelations = false, transaction = null) {
   try {
-    const options = { where: { applicationId: id } };
+    const options = { where: { applicationId: id }, transaction };
 
     if (includeRelations) {
       options.include = [
@@ -62,7 +62,7 @@ async function findById(id, includeRelations = false) {
  * @param {number} personId - The person ID
  * @returns {Promise<Application|null>} The application or null
  */
-async function findByPersonId(personId) {
+async function findByPersonId(personId, transaction = null) {
   try {
     return await Application.findOne({
       where: { personId },
@@ -85,7 +85,8 @@ async function findByPersonId(personId) {
             }
           ]
         }
-      ]
+      ],
+      transaction
     });
   } catch (error) {
     console.error('Error finding application by person ID:', error);
@@ -98,9 +99,9 @@ async function findByPersonId(personId) {
  * @param {boolean} includeRelations - Whether to include related data
  * @returns {Promise<Application[]>} Array of applications
  */
-async function findAll(includeRelations = false) {
+async function findAll(includeRelations = false, transaction = null) {
   try {
-    const options = {};
+    const options = { transaction };
 
     if (includeRelations) {
       options.include = [
@@ -124,15 +125,15 @@ async function findAll(includeRelations = false) {
  * @param {string} status - The new status
  * @returns {Promise<Application|null>} The updated application or null
  */
-async function updateStatus(id, status) {
+async function updateStatus(id, status, transaction = null) {
   try {
-    const application = await Application.findByPk(id);
+    const application = await Application.findByPk(id, { transaction });
     if (!application) {
       return null;
     }
 
     application.status = status;
-    await application.save();
+    await application.save({ transaction });
 
     return application;
   } catch (error) {

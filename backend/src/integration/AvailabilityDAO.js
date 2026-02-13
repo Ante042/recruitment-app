@@ -7,13 +7,13 @@ const { Availability } = require('../model');
  * @param {string} toDate - End date (YYYY-MM-DD)
  * @returns {Promise<Availability>} The created availability period
  */
-async function create(personId, fromDate, toDate) {
+async function create(personId, fromDate, toDate, transaction = null) {
   try {
     return await Availability.create({
       personId,
       fromDate,
       toDate
-    });
+    }, { transaction });
   } catch (error) {
     console.error('Error creating availability:', error);
     throw error;
@@ -25,10 +25,11 @@ async function create(personId, fromDate, toDate) {
  * @param {number} personId - The person ID
  * @returns {Promise<Availability[]>} Array of availability periods
  */
-async function findByPersonId(personId) {
+async function findByPersonId(personId, transaction = null) {
   try {
     return await Availability.findAll({
-      where: { personId }
+      where: { personId },
+      transaction
     });
   } catch (error) {
     console.error('Error finding availability by person ID:', error);
@@ -42,18 +43,19 @@ async function findByPersonId(personId) {
  * @param {number} personId - The person ID for ownership verification
  * @returns {Promise<boolean>} True if deleted, false if not found
  */
-async function deleteById(availabilityId, personId) {
+async function deleteById(availabilityId, personId, transaction = null) {
   try {
     const period = await Availability.findOne({
       where: {
         availabilityId,
         personId
-      }
+      },
+      transaction
     });
 
     if (!period) return false;
 
-    await period.destroy();
+    await period.destroy({ transaction });
     return true;
   } catch (error) {
     console.error('Error deleting availability period:', error);
