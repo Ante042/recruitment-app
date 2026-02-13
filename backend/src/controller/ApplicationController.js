@@ -292,6 +292,40 @@ async function deleteAvailability(req, res) {
   }
 }
 
+/**
+ * Delete own application and all related profile data
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+async function deleteApplication(req, res) {
+  try {
+    const personId = req.user.id;
+
+    await sequelize.transaction(async (t) => {
+      const application = await ApplicationDAO.findByPersonId(personId, t);
+      if (!application) {
+        throw { status: 404, error: 'No application found' };
+      }
+
+      if (application.status === 'accepted') {
+        throw { status: 403, error: 'Cannot delete an accepted application.' };
+      }
+
+      await CompetenceProfileDAO.deleteAllByPersonId(personId, t);
+      await AvailabilityDAO.deleteAllByPersonId(personId, t);
+      await ApplicationDAO.deleteByPersonId(personId, t);
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.error });
+    }
+    console.error('Error deleting application:', error);
+    res.status(500).json({ error: 'Failed to delete application' });
+  }
+}
+
 module.exports = {
   addCompetence,
   addAvailability,
@@ -302,5 +336,6 @@ module.exports = {
   updateApplicationStatus,
   getAllCompetences,
   deleteCompetence,
-  deleteAvailability
+  deleteAvailability,
+  deleteApplication
 };

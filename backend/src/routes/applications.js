@@ -24,6 +24,9 @@ router.post('/', requireAuth, requireRole('applicant'), ApplicationController.su
 // Get own application (must come before /:id)
 router.get('/me', requireAuth, requireRole('applicant'), ApplicationController.getMyApplication);
 
+// Delete own application (full reset)
+router.delete('/me', requireAuth, requireRole('applicant'), ApplicationController.deleteApplication);
+
 // RECRUITER ROUTES
 router.get('/', requireAuth, requireRole('recruiter'), ApplicationController.listApplications);
 router.get('/:id', requireAuth, requireRole('recruiter'), ApplicationController.getApplicationDetails);

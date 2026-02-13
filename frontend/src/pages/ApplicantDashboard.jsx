@@ -13,7 +13,8 @@ import {
   deleteCompetence,
   addAvailability,
   deleteAvailability,
-  submitApplication
+  submitApplication,
+  deleteMyApplication
 } from '../api/applications';
 
 const ApplicantDashboard = () => {
@@ -135,9 +136,28 @@ const ApplicantDashboard = () => {
     }
   };
 
+  const handleDeleteApplication = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your application? This will remove all your competences and availability periods.'
+    );
+    if (!confirmed) return;
+
+    setErrors([]);
+    try {
+      await deleteMyApplication();
+      setIsEditing(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting application:', error);
+      const message = error.response?.data?.error || 'Failed to delete application';
+      setErrors([message]);
+    }
+  };
+
   const isEditable = !application || application.status === 'unhandled';
   const hasSubmitted = !!application;
   const canEdit = !hasSubmitted || (isEditable && isEditing);
+  const canDelete = hasSubmitted && application.status !== 'accepted';
   const competenceProfiles = profile?.CompetenceProfiles || [];
   const availabilityPeriods = profile?.Availabilities || [];
   const canSubmit = competenceProfiles.length > 0 && availabilityPeriods.length > 0;
@@ -202,10 +222,27 @@ const ApplicantDashboard = () => {
                 </>
               )}
             </div>
+          ) : application.status === 'rejected' ? (
+            <p style={{ marginTop: '1rem', color: '#666' }}>
+              Your application was rejected. You may delete it and apply again.
+            </p>
           ) : (
             <p style={{ marginTop: '1rem', color: '#666' }}>
               Application locked - no further changes allowed.
             </p>
+          )}
+          {canDelete && (
+            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+              <button
+                onClick={handleDeleteApplication}
+                style={{ all: 'unset', padding: '0.4rem 1rem', backgroundColor: '#dc3545', color: 'white', borderRadius: '4px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}
+              >
+                Delete Application
+              </button>
+              <p style={{ color: '#999', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                This will remove your application and all competences and availability periods.
+              </p>
+            </div>
           )}
         </div>
       )}

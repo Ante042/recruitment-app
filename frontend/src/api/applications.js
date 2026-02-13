@@ -38,6 +38,10 @@ export const submitApplication = async () => {
   return response.data;
 };
 
+export const deleteMyApplication = async () => {
+  await client.delete('/applications/me');
+};
+
 export const getApplications = async () => {
   const response = await client.get('/applications');
   return response.data;

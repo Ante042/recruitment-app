@@ -63,8 +63,27 @@ async function deleteById(availabilityId, personId, transaction = null) {
   }
 }
 
+/**
+ * Delete all availability periods for a person
+ * @param {number} personId - The person ID
+ * @param {Object} transaction - Sequelize transaction
+ * @returns {Promise<number>} Number of deleted rows
+ */
+async function deleteAllByPersonId(personId, transaction = null) {
+  try {
+    return await Availability.destroy({
+      where: { personId },
+      transaction
+    });
+  } catch (error) {
+    console.error('Error deleting all availability periods for person:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   create,
   findByPersonId,
-  deleteById
+  deleteById,
+  deleteAllByPersonId
 };

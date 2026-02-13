@@ -63,8 +63,27 @@ async function deleteById(competenceProfileId, personId, transaction = null) {
   }
 }
 
+/**
+ * Delete all competence profiles for a person
+ * @param {number} personId - The person ID
+ * @param {Object} transaction - Sequelize transaction
+ * @returns {Promise<number>} Number of deleted rows
+ */
+async function deleteAllByPersonId(personId, transaction = null) {
+  try {
+    return await CompetenceProfile.destroy({
+      where: { personId },
+      transaction
+    });
+  } catch (error) {
+    console.error('Error deleting all competence profiles for person:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   create,
   findByPersonId,
-  deleteById
+  deleteById,
+  deleteAllByPersonId
 };

@@ -142,10 +142,30 @@ async function updateStatus(id, status, transaction = null) {
   }
 }
 
+/**
+ * Delete application by person ID
+ * @param {number} personId - The person ID
+ * @param {Object} transaction - Sequelize transaction
+ * @returns {Promise<boolean>} True if deleted, false if not found
+ */
+async function deleteByPersonId(personId, transaction = null) {
+  try {
+    const deleted = await Application.destroy({
+      where: { personId },
+      transaction
+    });
+    return deleted > 0;
+  } catch (error) {
+    console.error('Error deleting application by person ID:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   createApplication,
   findById,
   findByPersonId,
   findAll,
-  updateStatus
+  updateStatus,
+  deleteByPersonId
 };
