@@ -51,7 +51,7 @@ const ApplicationDetail = () => {
   const availabilities = person?.Availabilities ?? [];
 
   return (
-    <div style={{ maxWidth: '700px', width: '100%', padding: '2rem', alignSelf: 'flex-start' }}>
+    <div style={{ maxWidth: '700px', width: '100%', padding: '2rem' }}>
       <button
         onClick={() => navigate('/recruiter')}
         style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.875rem', padding: 0, marginBottom: '1.5rem' }}

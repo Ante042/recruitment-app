@@ -25,7 +25,7 @@ const RecruiterDashboard = () => {
   };
 
   return (
-    <div style={{ maxWidth: '800px', width: '100%', padding: '2rem', alignSelf: 'flex-start' }}>
+    <div style={{ maxWidth: '800px', width: '100%', padding: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1>Recruiter Dashboard</h1>
         <Button onClick={handleLogout} style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
