@@ -31,13 +31,4 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Database sync
-sequelize.sync()
-  .then(() => {
-    console.log('Database synced');
-  })
-  .catch(err => {
-    console.error('Database sync error:', err);
-  });
-
 module.exports = app;
