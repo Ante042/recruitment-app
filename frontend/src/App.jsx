@@ -9,6 +9,10 @@ import ApplicantDashboard from './pages/ApplicantDashboard';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import ApplicationDetail from './pages/ApplicationDetail';
 
+/**
+ * Root application component with routing configuration.
+ * @returns {JSX.Element}
+ */
 function App() {
   return (
     <AuthProvider>

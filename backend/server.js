@@ -5,6 +5,10 @@ const logger = require('./src/util/logger');
 
 const PORT = process.env.PORT || 3000;
 
+/**
+ * Initialize database connection and start the Express server.
+ * @returns {Promise<void>}
+ */
 async function startServer() {
   try {
     await sequelize.authenticate();

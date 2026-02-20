@@ -8,7 +8,11 @@ const logger = require('../util/logger');
 const sequelize = require('../config/database');
 
 /**
- * Register a new applicant
+ * Register a new applicant.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function register(req, res, next) {
   try {
@@ -53,7 +57,11 @@ async function register(req, res, next) {
 }
 
 /**
- * Login user (applicant or recruiter)
+ * Login user (applicant or recruiter).
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function login(req, res, next) {
   try {
@@ -109,7 +117,10 @@ async function login(req, res, next) {
 }
 
 /**
- * Logout user
+ * Logout user by clearing the auth cookie.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {void}
  */
 function logout(req, res) {
   res.cookie('token', '', {
@@ -125,7 +136,10 @@ function logout(req, res) {
 }
 
 /**
- * Get current authenticated user
+ * Get current authenticated user from the request.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {void}
  */
 function getCurrentUser(req, res) {
   res.status(200).json({ user: req.user });

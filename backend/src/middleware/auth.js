@@ -3,8 +3,12 @@ const PersonDAO = require('../integration/PersonDAO');
 const { UnauthorizedError, TokenExpiredError, TokenMalformedError, ForbiddenError } = require('../util/errors');
 
 /**
- * Middleware to require authentication
- * Extracts JWT from cookie, verifies it, and attaches user to req.user
+ * Middleware to require authentication.
+ * Extracts JWT from cookie, verifies it, and attaches user to req.user.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function requireAuth(req, res, next) {
   try {
@@ -43,8 +47,9 @@ async function requireAuth(req, res, next) {
 }
 
 /**
- * Middleware to require specific role
+ * Middleware to require a specific user role.
  * @param {string} role - The required role
+ * @returns {Function} Express middleware function
  */
 function requireRole(role) {
   return (req, res, next) => {

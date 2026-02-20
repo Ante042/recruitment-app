@@ -6,6 +6,10 @@ const {
   UnauthorizedError,
 } = require('../util/errors');
 
+/**
+ * Express router for test/debug error endpoints (development only).
+ * @type {import('express').Router}
+ */
 const router = express.Router();
 
 router.get('/error/validation', (req, res, next) => {

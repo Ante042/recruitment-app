@@ -1,6 +1,10 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+/**
+ * Sequelize model representing an availability period for a person.
+ * @type {import('sequelize').Model}
+ */
 const Availability = sequelize.define('Availability', {
   availabilityId: {
     type: DataTypes.INTEGER,

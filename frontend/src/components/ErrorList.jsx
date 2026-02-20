@@ -1,3 +1,9 @@
+/**
+ * Display a list of error messages.
+ * @param {Object} props
+ * @param {Array<string>} props.errors - Array of error messages
+ * @returns {JSX.Element|null} Error list or null if no errors
+ */
 const ErrorList = ({ errors }) => {
   if (!errors || errors.length === 0) return null;
 

@@ -1,3 +1,7 @@
+/**
+ * Model index that defines all Sequelize associations and exports all models.
+ * @module model
+ */
 const Person = require('./Person');
 const Competence = require('./Competence');
 const CompetenceProfile = require('./CompetenceProfile');

@@ -1,4 +1,9 @@
 const express = require('express');
+
+/**
+ * Express router for person profile endpoints.
+ * @type {import('express').Router}
+ */
 const router = express.Router();
 const PersonController = require('../controller/PersonController');
 const { requireAuth } = require('../middleware/auth');

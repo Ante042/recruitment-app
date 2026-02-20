@@ -1,3 +1,14 @@
+/**
+ * Reusable button component with loading state.
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Button content
+ * @param {Function} props.onClick - Click handler
+ * @param {boolean} [props.disabled=false] - Disabled state
+ * @param {boolean} [props.loading=false] - Loading state
+ * @param {string} [props.type='button'] - Button type attribute
+ * @param {Object} [props.style={}] - Custom inline styles
+ * @returns {JSX.Element}
+ */
 const Button = ({ children, onClick, disabled = false, loading = false, type = 'button', style = {} }) => {
   return (
     <button

@@ -9,10 +9,11 @@ const { handleDatabaseError } = require('../util/databaseErrorHandler');
 const logger = require('../util/logger');
 
 /**
- * Add a competence to the applicant's profile
+ * Add a competence to the applicant's profile.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function addCompetence(req, res, next) {
   try {
@@ -49,10 +50,11 @@ async function addCompetence(req, res, next) {
 }
 
 /**
- * Add an availability period to the applicant's profile
+ * Add an availability period to the applicant's profile.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function addAvailability(req, res, next) {
   try {
@@ -84,10 +86,11 @@ async function addAvailability(req, res, next) {
 }
 
 /**
- * Submit an application (applicant only)
+ * Submit an application (applicant only).
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function submitApplication(req, res, next) {
   try {
@@ -128,10 +131,11 @@ async function submitApplication(req, res, next) {
 }
 
 /**
- * Get applicant's own application
+ * Get applicant's own application.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function getMyApplication(req, res, next) {
   try {
@@ -154,10 +158,11 @@ async function getMyApplication(req, res, next) {
 }
 
 /**
- * List all applications (recruiter only)
+ * List all applications (recruiter only).
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function listApplications(req, res, next) {
   try {
@@ -175,10 +180,11 @@ async function listApplications(req, res, next) {
 }
 
 /**
- * Get application details (recruiter only)
+ * Get application details (recruiter only).
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function getApplicationDetails(req, res, next) {
   try {
@@ -206,10 +212,11 @@ async function getApplicationDetails(req, res, next) {
 }
 
 /**
- * Update application status (recruiter only)
+ * Update application status (recruiter only).
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function updateApplicationStatus(req, res, next) {
   try {
@@ -245,10 +252,11 @@ async function updateApplicationStatus(req, res, next) {
 }
 
 /**
- * Get all available competences for dropdown
+ * Get all available competences for dropdown.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function getAllCompetences(req, res, next) {
   try {
@@ -266,10 +274,11 @@ async function getAllCompetences(req, res, next) {
 }
 
 /**
- * Delete a competence profile
+ * Delete a competence profile.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function deleteCompetence(req, res, next) {
   try {
@@ -298,10 +307,11 @@ async function deleteCompetence(req, res, next) {
 }
 
 /**
- * Delete an availability period
+ * Delete an availability period.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function deleteAvailability(req, res, next) {
   try {
@@ -330,10 +340,11 @@ async function deleteAvailability(req, res, next) {
 }
 
 /**
- * Delete own application and all related profile data
+ * Delete own application and all related profile data.
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
+ * @param {Function} next - Express next middleware
+ * @returns {void}
  */
 async function deleteApplication(req, res, next) {
   try {

@@ -1,6 +1,10 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+/**
+ * Sequelize model linking a person to a competence with years of experience.
+ * @type {import('sequelize').Model}
+ */
 const CompetenceProfile = sequelize.define('CompetenceProfile', {
   competenceProfileId: {
     type: DataTypes.INTEGER,

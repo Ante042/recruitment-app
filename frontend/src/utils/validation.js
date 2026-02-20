@@ -1,13 +1,28 @@
+/**
+ * Validate email format.
+ * @param {string} email - The email to validate
+ * @returns {boolean} True if the email format is valid
+ */
 export const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
+/**
+ * Validate Swedish personal number format (YYYYMMDD-XXXX).
+ * @param {string} pnr - The personal number to validate
+ * @returns {boolean} True if the format is valid
+ */
 export const isValidPersonNumber = (pnr) => {
   const pnrRegex = /^\d{8}-\d{4}$/;
   return pnrRegex.test(pnr);
 };
 
+/**
+ * Validate registration form data.
+ * @param {Object} data - The form data to validate
+ * @returns {Array<string>} Array of error messages, empty if valid
+ */
 export const validateRegistrationForm = (data) => {
   const errors = [];
 
@@ -44,6 +59,11 @@ export const validateRegistrationForm = (data) => {
   return errors;
 };
 
+/**
+ * Validate login form data.
+ * @param {Object} data - The form data to validate
+ * @returns {Array<string>} Array of error messages, empty if valid
+ */
 export const validateLoginForm = (data) => {
   const errors = [];
 

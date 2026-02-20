@@ -1,4 +1,9 @@
 const express = require('express');
+
+/**
+ * Express router for application-related endpoints (competences, availability, applications).
+ * @type {import('express').Router}
+ */
 const router = express.Router();
 const ApplicationController = require('../controller/ApplicationController');
 const { requireAuth, requireRole } = require('../middleware/auth');

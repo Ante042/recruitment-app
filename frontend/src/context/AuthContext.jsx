@@ -3,6 +3,12 @@ import { registerUser, loginUser, logoutUser, getCurrentUser } from '../api/auth
 
 const AuthContext = createContext(null);
 
+/**
+ * Authentication context provider that manages user state.
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element}
+ */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +79,10 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+/**
+ * Hook to access the authentication context.
+ * @returns {Object} Auth context with user, loading, error, register, login, logout, checkAuth
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

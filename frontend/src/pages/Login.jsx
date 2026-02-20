@@ -6,6 +6,10 @@ import FormInput from '../components/FormInput';
 import ErrorList from '../components/ErrorList';
 import Button from '../components/Button';
 
+/**
+ * Login page for existing users.
+ * @returns {JSX.Element}
+ */
 const Login = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, login } = useAuth();

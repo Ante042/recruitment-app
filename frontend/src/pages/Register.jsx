@@ -6,6 +6,10 @@ import FormInput from '../components/FormInput';
 import ErrorList from '../components/ErrorList';
 import Button from '../components/Button';
 
+/**
+ * Registration page for new applicant accounts.
+ * @returns {JSX.Element}
+ */
 const Register = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, register } = useAuth();

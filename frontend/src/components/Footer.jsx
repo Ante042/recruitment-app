@@ -1,3 +1,7 @@
+/**
+ * Application footer displaying team member info.
+ * @returns {JSX.Element}
+ */
 const Footer = () => {
   return (
     <footer style={{

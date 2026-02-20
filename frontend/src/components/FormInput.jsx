@@ -1,5 +1,18 @@
 import { useState } from 'react';
 
+/**
+ * Reusable form input component with label and error display.
+ * @param {Object} props
+ * @param {string} props.label - Input label text
+ * @param {string} [props.type='text'] - Input type (text, password, email, etc.)
+ * @param {string} props.name - Input name attribute
+ * @param {string} props.value - Input value
+ * @param {Function} props.onChange - Change handler
+ * @param {string} [props.error] - Error message to display
+ * @param {boolean} [props.required=false] - Whether the field is required
+ * @param {string} [props.placeholder] - Input placeholder text
+ * @returns {JSX.Element}
+ */
 const FormInput = ({ label, type = 'text', name, value, onChange, error, required = false, placeholder }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';

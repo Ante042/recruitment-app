@@ -4,6 +4,10 @@ import StatusBadge from '../components/StatusBadge';
 import Button from '../components/Button';
 import { getApplicationById, updateApplicationStatus } from '../api/applications';
 
+/**
+ * Detailed view of a single application for recruiters.
+ * @returns {JSX.Element}
+ */
 const ApplicationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();

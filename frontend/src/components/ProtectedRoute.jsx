@@ -1,6 +1,13 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Route guard that redirects unauthenticated or unauthorized users.
+ * @param {Object} props
+ * @param {React.ReactNode} props.children - Protected content
+ * @param {string} [props.role] - Required role to access the route
+ * @returns {JSX.Element}
+ */
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
 

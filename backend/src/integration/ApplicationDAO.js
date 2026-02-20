@@ -1,8 +1,9 @@
 const { Application, Person, CompetenceProfile, Competence, Availability } = require('../model');
 
 /**
- * Create a new application
+ * Create a new application.
  * @param {number} personId - The person ID
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Application>} The created application
  */
 async function createApplication(personId, transaction = null) {
@@ -18,9 +19,10 @@ async function createApplication(personId, transaction = null) {
 }
 
 /**
- * Find application by ID
+ * Find application by ID.
  * @param {number} id - The application ID
- * @param {boolean} includeRelations - Whether to include related data
+ * @param {boolean} [includeRelations=false] - Whether to include related data
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Application|null>} The application or null
  */
 async function findById(id, includeRelations = false, transaction = null) {
@@ -58,8 +60,9 @@ async function findById(id, includeRelations = false, transaction = null) {
 }
 
 /**
- * Find application by person ID
+ * Find application by person ID.
  * @param {number} personId - The person ID
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Application|null>} The application or null
  */
 async function findByPersonId(personId, transaction = null) {
@@ -95,8 +98,9 @@ async function findByPersonId(personId, transaction = null) {
 }
 
 /**
- * Find all applications
- * @param {boolean} includeRelations - Whether to include related data
+ * Find all applications.
+ * @param {boolean} [includeRelations=false] - Whether to include related data
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Application[]>} Array of applications
  */
 async function findAll(includeRelations = false, transaction = null) {
@@ -120,9 +124,10 @@ async function findAll(includeRelations = false, transaction = null) {
 }
 
 /**
- * Update application status
+ * Update application status.
  * @param {number} id - The application ID
  * @param {string} status - The new status
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Application|null>} The updated application or null
  */
 async function updateStatus(id, status, transaction = null) {

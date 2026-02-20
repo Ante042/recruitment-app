@@ -5,6 +5,10 @@ import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import { getApplications } from '../api/applications';
 
+/**
+ * Dashboard page for recruiters to view and manage applications.
+ * @returns {JSX.Element}
+ */
 const RecruiterDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();

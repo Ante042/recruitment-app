@@ -56,6 +56,10 @@ const transports = [
   }),
 ];
 
+/**
+ * Application logger configured with console and file transports.
+ * @type {import('winston').Logger}
+ */
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   levels,

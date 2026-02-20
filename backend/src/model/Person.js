@@ -1,6 +1,10 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+/**
+ * Sequelize model representing a person (applicant or recruiter).
+ * @type {import('sequelize').Model}
+ */
 const Person = sequelize.define('Person', {
   personId: {
     type: DataTypes.INTEGER,

@@ -1,10 +1,11 @@
 const { CompetenceProfile } = require('../model');
 
 /**
- * Create a new competence profile
+ * Create a new competence profile.
  * @param {number} personId - The person ID
  * @param {number} competenceId - The competence ID
  * @param {number} years - Years of experience
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<CompetenceProfile>} The created competence profile
  */
 async function create(personId, competenceId, years, transaction = null) {
@@ -21,8 +22,9 @@ async function create(personId, competenceId, years, transaction = null) {
 }
 
 /**
- * Find competence profiles by person ID
+ * Find competence profiles by person ID.
  * @param {number} personId - The person ID
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<CompetenceProfile[]>} Array of competence profiles
  */
 async function findByPersonId(personId, transaction = null) {
@@ -38,9 +40,10 @@ async function findByPersonId(personId, transaction = null) {
 }
 
 /**
- * Delete a competence profile by ID with ownership check
+ * Delete a competence profile by ID with ownership check.
  * @param {number} competenceProfileId - The competence profile ID
  * @param {number} personId - The person ID for ownership verification
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<boolean>} True if deleted, false if not found
  */
 async function deleteById(competenceProfileId, personId, transaction = null) {

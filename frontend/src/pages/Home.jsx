@@ -1,6 +1,10 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Home page that redirects authenticated users or shows login/register links.
+ * @returns {JSX.Element}
+ */
 const Home = () => {
   const { user, loading } = useAuth();
 

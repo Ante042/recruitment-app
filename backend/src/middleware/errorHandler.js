@@ -1,5 +1,14 @@
 const logger = require('../util/logger');
 
+/**
+ * Send a structured JSON error response.
+ * @param {Object} res - Express response object
+ * @param {number} statusCode - HTTP status code
+ * @param {string} errorCode - Application error code
+ * @param {string} message - Error message
+ * @param {Array|null} [errors=null] - Optional list of detailed errors
+ * @returns {Object} Express response
+ */
 function errorResponse(res, statusCode, errorCode, message, errors = null) {
   const response = {
     error: message,
@@ -13,6 +22,14 @@ function errorResponse(res, statusCode, errorCode, message, errors = null) {
   return res.status(statusCode).json(response);
 }
 
+/**
+ * Global Express error handling middleware.
+ * @param {Error} err - The error object
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware
+ * @returns {Object} Express response
+ */
 function errorHandler(err, req, res, next) {
   if (err.isOperational) {
     logger.warn('Operational error:', {
@@ -60,6 +77,12 @@ function errorHandler(err, req, res, next) {
   }
 }
 
+/**
+ * Handle requests to undefined routes.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} Express response with 404 status
+ */
 function notFoundHandler(req, res) {
   logger.debug('404 Not Found:', { path: req.path, method: req.method });
   return errorResponse(res, 404, 'NOT_FOUND', `Route ${req.method} ${req.path} not found`);

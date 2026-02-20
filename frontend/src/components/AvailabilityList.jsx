@@ -1,3 +1,11 @@
+/**
+ * Display a list of availability periods with optional remove action.
+ * @param {Object} props
+ * @param {Array<Object>} props.availabilityPeriods - Array of availability period objects
+ * @param {boolean} props.isEditable - Whether remove buttons are shown
+ * @param {Function} props.onRemove - Handler called with availabilityId on remove
+ * @returns {JSX.Element}
+ */
 const AvailabilityList = ({ availabilityPeriods, isEditable, onRemove }) => {
   if (availabilityPeriods.length === 0) {
     return <p style={{ color: '#666', fontStyle: 'italic' }}>No availability periods added yet</p>;

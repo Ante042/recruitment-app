@@ -17,6 +17,10 @@ import {
   deleteMyApplication
 } from '../api/applications';
 
+/**
+ * Dashboard page for applicants to manage their profile and application.
+ * @returns {JSX.Element}
+ */
 const ApplicantDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();

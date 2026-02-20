@@ -1,5 +1,9 @@
 import axios from 'axios';
 
+/**
+ * Pre-configured Axios instance for API requests with credentials and error logging.
+ * @type {import('axios').AxiosInstance}
+ */
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   withCredentials: true,

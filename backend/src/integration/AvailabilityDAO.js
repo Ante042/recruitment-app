@@ -1,10 +1,11 @@
 const { Availability } = require('../model');
 
 /**
- * Create a new availability period
+ * Create a new availability period.
  * @param {number} personId - The person ID
  * @param {string} fromDate - Start date (YYYY-MM-DD)
  * @param {string} toDate - End date (YYYY-MM-DD)
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Availability>} The created availability period
  */
 async function create(personId, fromDate, toDate, transaction = null) {
@@ -21,8 +22,9 @@ async function create(personId, fromDate, toDate, transaction = null) {
 }
 
 /**
- * Find availability periods by person ID
+ * Find availability periods by person ID.
  * @param {number} personId - The person ID
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Availability[]>} Array of availability periods
  */
 async function findByPersonId(personId, transaction = null) {
@@ -38,9 +40,10 @@ async function findByPersonId(personId, transaction = null) {
 }
 
 /**
- * Delete an availability period by ID with ownership check
+ * Delete an availability period by ID with ownership check.
  * @param {number} availabilityId - The availability ID
  * @param {number} personId - The person ID for ownership verification
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<boolean>} True if deleted, false if not found
  */
 async function deleteById(availabilityId, personId, transaction = null) {

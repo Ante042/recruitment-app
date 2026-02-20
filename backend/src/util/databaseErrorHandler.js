@@ -1,6 +1,12 @@
 const { DatabaseError, ConflictError, ValidationError } = require('./errors');
 const logger = require('./logger');
 
+/**
+ * Convert Sequelize errors into appropriate application errors.
+ * @param {Error} error - The Sequelize error
+ * @param {string} [context=''] - Description of where the error occurred
+ * @returns {ConflictError|ValidationError|DatabaseError} Converted application error
+ */
 function handleDatabaseError(error, context = '') {
   logger.error(`Database error in ${context}:`, {
     name: error.name,

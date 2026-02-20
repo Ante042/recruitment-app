@@ -1,3 +1,11 @@
+/**
+ * Display a list of competence profiles with optional remove action.
+ * @param {Object} props
+ * @param {Array<Object>} props.competenceProfiles - Array of competence profile objects
+ * @param {boolean} props.isEditable - Whether remove buttons are shown
+ * @param {Function} props.onRemove - Handler called with competenceProfileId on remove
+ * @returns {JSX.Element}
+ */
 const CompetenceList = ({ competenceProfiles, isEditable, onRemove }) => {
   if (competenceProfiles.length === 0) {
     return <p style={{ color: '#666', fontStyle: 'italic' }}>No competences added yet</p>;

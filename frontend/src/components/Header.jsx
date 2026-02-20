@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
 
+/**
+ * Application header with navigation link.
+ * @returns {JSX.Element}
+ */
 const Header = () => {
   return (
     <header style={{

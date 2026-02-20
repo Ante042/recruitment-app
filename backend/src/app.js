@@ -9,6 +9,10 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const logger = require('./util/logger');
 require('./model');
 
+/**
+ * Configured Express application with middleware, routes and error handling.
+ * @type {import('express').Application}
+ */
 const app = express();
 
 // CORS configuration - allow credentials for JWT cookies

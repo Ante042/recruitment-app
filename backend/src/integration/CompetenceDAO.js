@@ -1,7 +1,8 @@
 const { Competence } = require('../model');
 
 /**
- * Find all competences
+ * Find all competences.
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Competence[]>} Array of competences
  */
 async function findAll(transaction = null) {
@@ -14,8 +15,9 @@ async function findAll(transaction = null) {
 }
 
 /**
- * Find competence by ID
+ * Find competence by ID.
  * @param {number} id - The competence ID
+ * @param {Object|null} [transaction=null] - Sequelize transaction
  * @returns {Promise<Competence|null>} The competence or null
  */
 async function findById(id, transaction = null) {

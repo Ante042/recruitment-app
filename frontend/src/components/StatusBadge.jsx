@@ -1,3 +1,9 @@
+/**
+ * Badge component displaying application status with color coding.
+ * @param {Object} props
+ * @param {string} props.status - Application status (unhandled, accepted, rejected)
+ * @returns {JSX.Element}
+ */
 const StatusBadge = ({ status }) => {
   const getStatusStyle = () => {
     switch (status) {
