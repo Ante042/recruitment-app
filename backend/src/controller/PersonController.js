@@ -1,4 +1,6 @@
 const PersonDAO = require('../integration/PersonDAO');
+const { NotFoundError } = require('../util/errors');
+const { handleDatabaseError } = require('../util/databaseErrorHandler');
 const sequelize = require('../config/database');
 
 /**
@@ -6,20 +8,21 @@ const sequelize = require('../config/database');
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-async function getMyProfile(req, res) {
+async function getMyProfile(req, res, next) {
   try {
-    const person = await sequelize.transaction(async (t) => {
-      return await PersonDAO.findByIdWithProfiles(req.user.id, t);
-    });
+    const person = await PersonDAO.findByIdWithProfiles(req.user.id);
 
     if (!person) {
-      return res.status(404).json({ error: 'Profile not found' });
+      throw new NotFoundError('Profile');
     }
 
     res.json(person);
   } catch (error) {
-    console.error('Error getting profile:', error);
-    res.status(500).json({ error: 'Failed to get profile' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'getMyProfile'));
+    } else {
+      next(error);
+    }
   }
 }
 

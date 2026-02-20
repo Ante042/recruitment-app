@@ -1,5 +1,6 @@
 const { verifyToken } = require('../util/jwt');
 const PersonDAO = require('../integration/PersonDAO');
+const { UnauthorizedError, TokenExpiredError, TokenMalformedError, ForbiddenError } = require('../util/errors');
 
 /**
  * Middleware to require authentication
@@ -10,19 +11,16 @@ async function requireAuth(req, res, next) {
     const token = req.cookies?.token;
 
     if (!token) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      throw new UnauthorizedError('No token provided');
     }
 
-    // Verify token
     const decoded = verifyToken(token);
 
-    // Get user from database
     const person = await PersonDAO.findById(decoded.userId);
     if (!person) {
-      return res.status(401).json({ error: 'User not found' });
+      throw new UnauthorizedError('User not found');
     }
 
-    // Attach user to request
     req.user = {
       id: person.personId,
       username: person.username,
@@ -34,8 +32,13 @@ async function requireAuth(req, res, next) {
 
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    return res.status(401).json({ error: 'Invalid token' });
+    if (error.name === 'TokenExpiredError') {
+      next(new TokenExpiredError());
+    } else if (error.name === 'JsonWebTokenError') {
+      next(new TokenMalformedError());
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -46,11 +49,11 @@ async function requireAuth(req, res, next) {
 function requireRole(role) {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return next(new UnauthorizedError());
     }
 
     if (req.user.role !== role) {
-      return res.status(403).json({ error: 'Access denied' });
+      return next(new ForbiddenError());
     }
 
     next();

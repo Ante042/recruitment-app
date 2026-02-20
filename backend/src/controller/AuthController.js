@@ -2,18 +2,21 @@ const PersonDAO = require('../integration/PersonDAO');
 const { hashPassword, comparePassword } = require('../util/password');
 const { generateToken } = require('../util/jwt');
 const { validateRegistration, validateLogin } = require('../util/validation');
+const { ValidationError, ConflictError, UnauthorizedError } = require('../util/errors');
+const { handleDatabaseError } = require('../util/databaseErrorHandler');
+const logger = require('../util/logger');
 const sequelize = require('../config/database');
 
 /**
  * Register a new applicant
  */
-async function register(req, res) {
+async function register(req, res, next) {
   try {
     const { firstName, lastName, email, personNumber, username, password } = req.body;
 
     const validation = validateRegistration(req.body);
     if (!validation.valid) {
-      return res.status(400).json({ errors: validation.errors });
+      throw new ValidationError('Validation failed', validation.errors);
     }
 
     const passwordHash = await hashPassword(password);
@@ -21,12 +24,12 @@ async function register(req, res) {
     const person = await sequelize.transaction(async (t) => {
       const existingUsername = await PersonDAO.findByUsername(username, t);
       if (existingUsername) {
-        throw { status: 409, error: 'Username already exists' };
+        throw new ConflictError('Username already exists');
       }
 
       const existingEmail = await PersonDAO.findByEmail(email, t);
       if (existingEmail) {
-        throw { status: 409, error: 'Email already exists' };
+        throw new ConflictError('Email already exists');
       }
 
       return await PersonDAO.createPerson({
@@ -34,42 +37,42 @@ async function register(req, res) {
       }, t);
     });
 
+    logger.info('User registered successfully', { username: person.username });
+
     res.status(201).json({
       message: 'Account created successfully',
       username: person.username
     });
   } catch (error) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.error });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'register'));
+    } else {
+      next(error);
     }
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
   }
 }
 
 /**
  * Login user (applicant or recruiter)
  */
-async function login(req, res) {
+async function login(req, res, next) {
   try {
     const { username, password } = req.body;
 
     const validation = validateLogin(req.body);
     if (!validation.valid) {
-      return res.status(400).json({ errors: validation.errors });
+      throw new ValidationError('Validation failed', validation.errors);
     }
 
-    const person = await sequelize.transaction(async (t) => {
-      return await PersonDAO.findByUsername(username, t);
-    });
+    const person = await PersonDAO.findByUsername(username);
 
     if (!person) {
-      return res.status(401).json({ error: 'Login failed' });
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const isPasswordValid = await comparePassword(password, person.passwordHash);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Login failed' });
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const token = generateToken({
@@ -85,6 +88,8 @@ async function login(req, res) {
       maxAge: 24 * 60 * 60 * 1000
     });
 
+    logger.info('User logged in', { username: person.username });
+
     res.status(200).json({
       user: {
         id: person.personId,
@@ -95,8 +100,11 @@ async function login(req, res) {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'login'));
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -110,6 +118,9 @@ function logout(req, res) {
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     maxAge: 0
   });
+
+  logger.info('User logged out', { userId: req.user?.id });
+
   res.status(200).json({ message: 'Logged out successfully' });
 }
 

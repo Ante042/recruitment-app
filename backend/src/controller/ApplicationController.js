@@ -4,42 +4,47 @@ const CompetenceProfileDAO = require('../integration/CompetenceProfileDAO');
 const AvailabilityDAO = require('../integration/AvailabilityDAO');
 const { validateCompetence, validateAvailability, validateStatusUpdate } = require('../util/validation');
 const sequelize = require('../config/database');
+const { ValidationError, NotFoundError, ForbiddenError } = require('../util/errors');
+const { handleDatabaseError } = require('../util/databaseErrorHandler');
+const logger = require('../util/logger');
 
 /**
  * Add a competence to the applicant's profile
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function addCompetence(req, res) {
+async function addCompetence(req, res, next) {
   try {
     const { competenceId, yearsOfExperience } = req.body;
 
     const validation = validateCompetence({ competenceId, yearsOfExperience });
     if (!validation.valid) {
-      return res.status(400).json({ errors: validation.errors });
+      throw new ValidationError('Validation failed', validation.errors);
     }
 
     const profile = await sequelize.transaction(async (t) => {
       const existingApplication = await ApplicationDAO.findByPersonId(req.user.id, t);
       if (existingApplication && existingApplication.status !== 'unhandled') {
-        throw { status: 403, error: `Application is ${existingApplication.status} and cannot be modified.` };
+        throw new ForbiddenError(`Application is ${existingApplication.status} and cannot be modified.`);
       }
 
       const competence = await CompetenceDAO.findById(competenceId, t);
       if (!competence) {
-        throw { status: 404, error: 'Competence not found' };
+        throw new NotFoundError('Competence');
       }
 
       return await CompetenceProfileDAO.create(req.user.id, competenceId, yearsOfExperience, t);
     });
 
+    logger.info(`Competence ${competenceId} added for user ${req.user.id}`);
     res.status(201).json(profile);
   } catch (error) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.error });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'addCompetence'));
+    } else {
+      next(error);
     }
-    console.error('Error adding competence:', error);
-    res.status(500).json({ error: 'Failed to add competence' });
   }
 }
 
@@ -47,32 +52,34 @@ async function addCompetence(req, res) {
  * Add an availability period to the applicant's profile
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function addAvailability(req, res) {
+async function addAvailability(req, res, next) {
   try {
     const { fromDate, toDate } = req.body;
 
     const validation = validateAvailability({ fromDate, toDate });
     if (!validation.valid) {
-      return res.status(400).json({ errors: validation.errors });
+      throw new ValidationError('Validation failed', validation.errors);
     }
 
     const availability = await sequelize.transaction(async (t) => {
       const existingApplication = await ApplicationDAO.findByPersonId(req.user.id, t);
       if (existingApplication && existingApplication.status !== 'unhandled') {
-        throw { status: 403, error: `Application is ${existingApplication.status} and cannot be modified.` };
+        throw new ForbiddenError(`Application is ${existingApplication.status} and cannot be modified.`);
       }
 
       return await AvailabilityDAO.create(req.user.id, fromDate, toDate, t);
     });
 
+    logger.info(`Availability added for user ${req.user.id}`);
     res.status(201).json(availability);
   } catch (error) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.error });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'addAvailability'));
+    } else {
+      next(error);
     }
-    console.error('Error adding availability:', error);
-    res.status(500).json({ error: 'Failed to add availability' });
   }
 }
 
@@ -80,41 +87,43 @@ async function addAvailability(req, res) {
  * Submit an application (applicant only)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function submitApplication(req, res) {
+async function submitApplication(req, res, next) {
   try {
     const personId = req.user.id;
 
     const application = await sequelize.transaction(async (t) => {
       const existingApplication = await ApplicationDAO.findByPersonId(personId, t);
       if (existingApplication) {
-        throw { status: 409, error: 'Application already submitted' };
+        throw new ValidationError('Application already submitted', [{ field: 'application', message: 'Application already submitted' }]);
       }
 
       const competences = await CompetenceProfileDAO.findByPersonId(personId, t);
       if (competences.length === 0) {
-        throw { status: 400, error: 'At least one competence is required' };
+        throw new ValidationError('At least one competence is required', [{ field: 'competences', message: 'At least one competence is required' }]);
       }
 
       const availability = await AvailabilityDAO.findByPersonId(personId, t);
       if (availability.length === 0) {
-        throw { status: 400, error: 'At least one availability period is required' };
+        throw new ValidationError('At least one availability period is required', [{ field: 'availability', message: 'At least one availability period is required' }]);
       }
 
       return await ApplicationDAO.createApplication(personId, t);
     });
 
+    logger.info(`Application submitted for user ${personId}`);
     res.status(201).json({
       applicationId: application.applicationId,
       status: application.status,
       submittedAt: application.submittedAt
     });
   } catch (error) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.error });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'submitApplication'));
+    } else {
+      next(error);
     }
-    console.error('Error submitting application:', error);
-    res.status(500).json({ error: 'Failed to submit application' });
   }
 }
 
@@ -122,21 +131,25 @@ async function submitApplication(req, res) {
  * Get applicant's own application
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function getMyApplication(req, res) {
+async function getMyApplication(req, res, next) {
   try {
     const application = await sequelize.transaction(async (t) => {
       return await ApplicationDAO.findByPersonId(req.user.id, t);
     });
 
     if (!application) {
-      return res.status(404).json({ error: 'Application not found' });
+      throw new NotFoundError('Application');
     }
 
     res.json(application);
   } catch (error) {
-    console.error('Error getting own application:', error);
-    res.status(500).json({ error: 'Failed to get application' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'getMyApplication'));
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -144,16 +157,20 @@ async function getMyApplication(req, res) {
  * List all applications (recruiter only)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function listApplications(req, res) {
+async function listApplications(req, res, next) {
   try {
     const applications = await sequelize.transaction(async (t) => {
       return await ApplicationDAO.findAll(true, t);
     });
     res.json(applications);
   } catch (error) {
-    console.error('Error listing applications:', error);
-    res.status(500).json({ error: 'Failed to list applications' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'listApplications'));
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -161,12 +178,13 @@ async function listApplications(req, res) {
  * Get application details (recruiter only)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function getApplicationDetails(req, res) {
+async function getApplicationDetails(req, res, next) {
   try {
     const applicationId = parseInt(req.params.id);
     if (isNaN(applicationId)) {
-      return res.status(400).json({ error: 'Invalid application ID' });
+      throw new ValidationError('Invalid application ID', [{ field: 'id', message: 'Invalid application ID' }]);
     }
 
     const application = await sequelize.transaction(async (t) => {
@@ -174,13 +192,16 @@ async function getApplicationDetails(req, res) {
     });
 
     if (!application) {
-      return res.status(404).json({ error: 'Application not found' });
+      throw new NotFoundError('Application');
     }
 
     res.json(application);
   } catch (error) {
-    console.error('Error getting application details:', error);
-    res.status(500).json({ error: 'Failed to get application details' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'getApplicationDetails'));
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -188,36 +209,38 @@ async function getApplicationDetails(req, res) {
  * Update application status (recruiter only)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function updateApplicationStatus(req, res) {
+async function updateApplicationStatus(req, res, next) {
   try {
     const applicationId = parseInt(req.params.id);
     const { status } = req.body;
 
     if (isNaN(applicationId)) {
-      return res.status(400).json({ error: 'Invalid application ID' });
+      throw new ValidationError('Invalid application ID', [{ field: 'id', message: 'Invalid application ID' }]);
     }
 
     const validation = validateStatusUpdate({ status });
     if (!validation.valid) {
-      return res.status(400).json({ errors: validation.errors });
+      throw new ValidationError('Validation failed', validation.errors);
     }
 
     const application = await sequelize.transaction(async (t) => {
       const result = await ApplicationDAO.updateStatus(applicationId, status, t);
       if (!result) {
-        throw { status: 404, error: 'Application not found' };
+        throw new NotFoundError('Application');
       }
       return result;
     });
 
+    logger.info(`Application ${applicationId} status updated to ${status}`);
     res.json(application);
   } catch (error) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.error });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'updateApplicationStatus'));
+    } else {
+      next(error);
     }
-    console.error('Error updating application status:', error);
-    res.status(500).json({ error: 'Failed to update application status' });
   }
 }
 
@@ -225,16 +248,20 @@ async function updateApplicationStatus(req, res) {
  * Get all available competences for dropdown
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function getAllCompetences(req, res) {
+async function getAllCompetences(req, res, next) {
   try {
     const competences = await sequelize.transaction(async (t) => {
       return await CompetenceDAO.findAll(t);
     });
     res.json(competences);
   } catch (error) {
-    console.error('Error getting all competences:', error);
-    res.status(500).json({ error: 'Failed to get competences' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'getAllCompetences'));
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -242,12 +269,13 @@ async function getAllCompetences(req, res) {
  * Delete a competence profile
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function deleteCompetence(req, res) {
+async function deleteCompetence(req, res, next) {
   try {
     const competenceProfileId = parseInt(req.params.id);
     if (isNaN(competenceProfileId)) {
-      return res.status(400).json({ error: 'Invalid competence profile ID' });
+      throw new ValidationError('Invalid competence profile ID', [{ field: 'id', message: 'Invalid competence profile ID' }]);
     }
 
     const deleted = await sequelize.transaction(async (t) => {
@@ -255,13 +283,17 @@ async function deleteCompetence(req, res) {
     });
 
     if (!deleted) {
-      return res.status(404).json({ error: 'Competence profile not found' });
+      throw new NotFoundError('Competence profile');
     }
 
+    logger.info(`Competence profile ${competenceProfileId} deleted for user ${req.user.id}`);
     res.status(204).send();
   } catch (error) {
-    console.error('Error deleting competence:', error);
-    res.status(500).json({ error: 'Failed to delete competence' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'deleteCompetence'));
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -269,12 +301,13 @@ async function deleteCompetence(req, res) {
  * Delete an availability period
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function deleteAvailability(req, res) {
+async function deleteAvailability(req, res, next) {
   try {
     const availabilityId = parseInt(req.params.id);
     if (isNaN(availabilityId)) {
-      return res.status(400).json({ error: 'Invalid availability ID' });
+      throw new ValidationError('Invalid availability ID', [{ field: 'id', message: 'Invalid availability ID' }]);
     }
 
     const deleted = await sequelize.transaction(async (t) => {
@@ -282,13 +315,17 @@ async function deleteAvailability(req, res) {
     });
 
     if (!deleted) {
-      return res.status(404).json({ error: 'Availability period not found' });
+      throw new NotFoundError('Availability period');
     }
 
+    logger.info(`Availability ${availabilityId} deleted for user ${req.user.id}`);
     res.status(204).send();
   } catch (error) {
-    console.error('Error deleting availability:', error);
-    res.status(500).json({ error: 'Failed to delete availability' });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'deleteAvailability'));
+    } else {
+      next(error);
+    }
   }
 }
 
@@ -296,19 +333,20 @@ async function deleteAvailability(req, res) {
  * Delete own application and all related profile data
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function deleteApplication(req, res) {
+async function deleteApplication(req, res, next) {
   try {
     const personId = req.user.id;
 
     await sequelize.transaction(async (t) => {
       const application = await ApplicationDAO.findByPersonId(personId, t);
       if (!application) {
-        throw { status: 404, error: 'No application found' };
+        throw new NotFoundError('Application');
       }
 
       if (application.status === 'accepted') {
-        throw { status: 403, error: 'Cannot delete an accepted application.' };
+        throw new ForbiddenError('Cannot delete an accepted application.');
       }
 
       await CompetenceProfileDAO.deleteAllByPersonId(personId, t);
@@ -316,13 +354,14 @@ async function deleteApplication(req, res) {
       await ApplicationDAO.deleteByPersonId(personId, t);
     });
 
+    logger.info(`Application deleted for user ${personId}`);
     res.status(204).send();
   } catch (error) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.error });
+    if (error.name && error.name.startsWith('Sequelize')) {
+      next(handleDatabaseError(error, 'deleteApplication'));
+    } else {
+      next(error);
     }
-    console.error('Error deleting application:', error);
-    res.status(500).json({ error: 'Failed to delete application' });
   }
 }
 

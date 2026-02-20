@@ -5,6 +5,8 @@ const sequelize = require('./config/database');
 const authRoutes = require('./routes/auth');
 const applicationRoutes = require('./routes/applications');
 const personRoutes = require('./routes/person');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const logger = require('./util/logger');
 require('./model');
 
 const app = express();
@@ -18,6 +20,12 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Request logging
+app.use((req, res, next) => {
+  logger.http(`${req.method} ${req.path}`);
+  next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/applications', applicationRoutes);
@@ -30,5 +38,17 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
+// Test routes (development only)
+if (process.env.NODE_ENV !== 'production') {
+  const testRoutes = require('./routes/test');
+  app.use('/api/test', testRoutes);
+}
+
+// 404 handler - must be after all routes
+app.use(notFoundHandler);
+
+// Global error handler - must be last
+app.use(errorHandler);
 
 module.exports = app;
