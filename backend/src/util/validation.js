@@ -171,9 +171,19 @@ function validateStatusUpdate(data) {
   };
 }
 
+/**
+ * Check if a value is a positive integer
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isPositiveInteger(value) {
+  return Number.isInteger(value) && value > 0;
+}
+
 module.exports = {
   isValidEmail,
   isValidPersonNumber,
+  isPositiveInteger,
   validateRegistration,
   validateLogin,
   validateCompetence,

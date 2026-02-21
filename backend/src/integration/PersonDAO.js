@@ -1,5 +1,6 @@
 const Person = require('../model/Person');
 const { CompetenceProfile, Competence, Availability } = require('../model');
+const { isValidEmail, isValidPersonNumber } = require('../util/validation');
 
 /**
  * Find a person by username
@@ -44,6 +45,27 @@ async function findById(id, transaction = null) {
  * @returns {Promise<Person>} The created person
  */
 async function createPerson(personData, transaction = null) {
+  const { firstName, lastName, email, personNumber, username, passwordHash } = personData;
+
+  if (!firstName || typeof firstName !== 'string' || firstName.trim() === '') {
+    throw new Error('firstName must be a non-empty string');
+  }
+  if (!lastName || typeof lastName !== 'string' || lastName.trim() === '') {
+    throw new Error('lastName must be a non-empty string');
+  }
+  if (!email || !isValidEmail(email)) {
+    throw new Error('email must be a valid email address');
+  }
+  if (!personNumber || !isValidPersonNumber(personNumber)) {
+    throw new Error('personNumber must be in YYYYMMDD-XXXX format');
+  }
+  if (!username || typeof username !== 'string' || username.trim() === '') {
+    throw new Error('username must be a non-empty string');
+  }
+  if (!passwordHash || typeof passwordHash !== 'string' || passwordHash.trim() === '') {
+    throw new Error('passwordHash must be a non-empty string');
+  }
+
   return await Person.create(personData, { transaction });
 }
 

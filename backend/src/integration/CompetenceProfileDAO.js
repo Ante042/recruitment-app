@@ -1,4 +1,5 @@
 const { CompetenceProfile } = require('../model');
+const { isPositiveInteger } = require('../util/validation');
 
 /**
  * Create a new competence profile.
@@ -9,6 +10,9 @@ const { CompetenceProfile } = require('../model');
  * @returns {Promise<CompetenceProfile>} The created competence profile
  */
 async function create(personId, competenceId, years, transaction = null) {
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
+  if (!isPositiveInteger(competenceId)) throw new Error('competenceId must be a positive integer');
+  if (typeof years !== 'number' || years < 0) throw new Error('years must be a non-negative number');
   try {
     return await CompetenceProfile.create({
       personId,
@@ -47,6 +51,8 @@ async function findByPersonId(personId, transaction = null) {
  * @returns {Promise<boolean>} True if deleted, false if not found
  */
 async function deleteById(competenceProfileId, personId, transaction = null) {
+  if (!isPositiveInteger(competenceProfileId)) throw new Error('competenceProfileId must be a positive integer');
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
   try {
     const profile = await CompetenceProfile.findOne({
       where: {
@@ -73,6 +79,7 @@ async function deleteById(competenceProfileId, personId, transaction = null) {
  * @returns {Promise<number>} Number of deleted rows
  */
 async function deleteAllByPersonId(personId, transaction = null) {
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
   try {
     return await CompetenceProfile.destroy({
       where: { personId },

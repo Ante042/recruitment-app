@@ -1,4 +1,5 @@
 const { Availability } = require('../model');
+const { isPositiveInteger } = require('../util/validation');
 
 /**
  * Create a new availability period.
@@ -9,6 +10,11 @@ const { Availability } = require('../model');
  * @returns {Promise<Availability>} The created availability period
  */
 async function create(personId, fromDate, toDate, transaction = null) {
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!fromDate || !dateRegex.test(fromDate)) throw new Error('fromDate must be in YYYY-MM-DD format');
+  if (!toDate || !dateRegex.test(toDate)) throw new Error('toDate must be in YYYY-MM-DD format');
+  if (new Date(toDate) < new Date(fromDate)) throw new Error('toDate must be equal to or after fromDate');
   try {
     return await Availability.create({
       personId,
@@ -47,6 +53,8 @@ async function findByPersonId(personId, transaction = null) {
  * @returns {Promise<boolean>} True if deleted, false if not found
  */
 async function deleteById(availabilityId, personId, transaction = null) {
+  if (!isPositiveInteger(availabilityId)) throw new Error('availabilityId must be a positive integer');
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
   try {
     const period = await Availability.findOne({
       where: {
@@ -73,6 +81,7 @@ async function deleteById(availabilityId, personId, transaction = null) {
  * @returns {Promise<number>} Number of deleted rows
  */
 async function deleteAllByPersonId(personId, transaction = null) {
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
   try {
     return await Availability.destroy({
       where: { personId },

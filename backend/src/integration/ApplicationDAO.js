@@ -1,4 +1,5 @@
 const { Application, Person, CompetenceProfile, Competence, Availability } = require('../model');
+const { isPositiveInteger } = require('../util/validation');
 
 /**
  * Create a new application.
@@ -7,6 +8,7 @@ const { Application, Person, CompetenceProfile, Competence, Availability } = req
  * @returns {Promise<Application>} The created application
  */
 async function createApplication(personId, transaction = null) {
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
   try {
     return await Application.create({
       personId,
@@ -131,6 +133,9 @@ async function findAll(includeRelations = false, transaction = null) {
  * @returns {Promise<Application|null>} The updated application or null
  */
 async function updateStatus(id, status, transaction = null) {
+  if (!isPositiveInteger(id)) throw new Error('id must be a positive integer');
+  const validStatuses = ['unhandled', 'accepted', 'rejected'];
+  if (!status || !validStatuses.includes(status)) throw new Error('status must be one of: unhandled, accepted, rejected');
   try {
     const application = await Application.findByPk(id, { transaction });
     if (!application) {
@@ -154,6 +159,7 @@ async function updateStatus(id, status, transaction = null) {
  * @returns {Promise<boolean>} True if deleted, false if not found
  */
 async function deleteByPersonId(personId, transaction = null) {
+  if (!isPositiveInteger(personId)) throw new Error('personId must be a positive integer');
   try {
     const deleted = await Application.destroy({
       where: { personId },
