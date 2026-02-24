@@ -9,6 +9,8 @@ const ErrorList = ({ errors }) => {
 
   return (
     <div
+      role="alert"
+      aria-live="polite"
       style={{
         backgroundColor: '#fee',
         border: '1px solid red',

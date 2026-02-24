@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       const errorData = err.response?.data;
       setError(errorData);
-      return { success: false, error: errorData };
+      return { success: false, error: errorData, userMessage: err.userMessage };
     }
   };
 
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       const errorData = err.response?.data;
       setError(errorData);
-      return { success: false, error: errorData };
+      return { success: false, error: errorData, userMessage: err.userMessage };
     }
   };
 

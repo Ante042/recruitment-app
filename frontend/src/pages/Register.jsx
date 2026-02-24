@@ -72,10 +72,8 @@ const Register = () => {
 
       if (result.error?.errors) {
         setErrors(result.error.errors);
-      } else if (result.error?.error) {
-        setErrors([result.error.error]);
       } else {
-        setErrors(['Registration failed. Please try again.']);
+        setErrors([result.userMessage || 'Registration failed. Please try again.']);
       }
     }
   };

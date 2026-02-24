@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
+import NetworkStatus from './components/NetworkStatus';
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -15,10 +17,12 @@ import ApplicationDetail from './pages/ApplicationDetail';
  */
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Layout>
-        <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <NetworkStatus />
+          <Layout>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
@@ -46,10 +50,11 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
-        </Layout>
-      </BrowserRouter>
-    </AuthProvider>
+          </Routes>
+          </Layout>
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

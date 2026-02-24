@@ -60,12 +60,7 @@ const Login = () => {
       navigate(redirectPath);
     } else {
       setLoading(false);
-
-      if (result.error?.error) {
-        setErrors(['Invalid username or password']);
-      } else {
-        setErrors(['Login failed. Please try again.']);
-      }
+      setErrors([result.userMessage || 'Login failed. Please try again.']);
     }
   };
 

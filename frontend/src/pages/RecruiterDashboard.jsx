@@ -19,7 +19,7 @@ const RecruiterDashboard = () => {
   useEffect(() => {
     getApplications()
       .then(data => setApplications(data))
-      .catch(() => setError('Failed to load applications.'))
+      .catch(err => setError(err.userMessage))
       .finally(() => setLoading(false));
   }, []);
 

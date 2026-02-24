@@ -25,7 +25,7 @@ const ApplicationDetail = () => {
         setApplication(data);
         setSelectedStatus(data.status);
       })
-      .catch(() => setError('Failed to load application.'))
+      .catch(err => setError(err.userMessage))
       .finally(() => setLoading(false));
   };
 
@@ -39,8 +39,8 @@ const ApplicationDetail = () => {
     try {
       await updateApplicationStatus(id, selectedStatus);
       fetchApplication();
-    } catch {
-      setUpdateError('Failed to update status.');
+    } catch (err) {
+      setUpdateError(err.userMessage);
     } finally {
       setUpdating(false);
     }

@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import CompetenceList from '../components/CompetenceList';
 import AvailabilityList from '../components/AvailabilityList';
+import ErrorList from '../components/ErrorList';
 import {
   getCompetences,
   getMyProfile,
@@ -52,8 +53,7 @@ const ApplicantDashboard = () => {
       setProfile(profileData);
       setApplication(applicationData);
     } catch (error) {
-      console.error('Error loading data:', error);
-      setErrors(['Failed to load data. Please refresh the page.']);
+      setErrors([error.userMessage]);
     } finally {
       setLoading(false);
     }
@@ -80,9 +80,7 @@ const ApplicantDashboard = () => {
       setCompetenceForm({ competenceId: '', yearsOfExperience: '' });
       await loadData();
     } catch (error) {
-      console.error('Error adding competence:', error);
-      const message = error.response?.data?.error || error.response?.data?.errors?.[0] || 'Failed to add competence';
-      setErrors([message]);
+      setErrors([error.userMessage]);
     }
   };
 
@@ -92,9 +90,7 @@ const ApplicantDashboard = () => {
       await deleteCompetence(competenceProfileId);
       await loadData();
     } catch (error) {
-      console.error('Error removing competence:', error);
-      const message = error.response?.data?.error || 'Failed to remove competence';
-      setErrors([message]);
+      setErrors([error.userMessage]);
     }
   };
 
@@ -110,9 +106,7 @@ const ApplicantDashboard = () => {
       setAvailabilityForm({ fromDate: '', toDate: '' });
       await loadData();
     } catch (error) {
-      console.error('Error adding availability:', error);
-      const message = error.response?.data?.error || error.response?.data?.errors?.[0] || 'Failed to add availability';
-      setErrors([message]);
+      setErrors([error.userMessage]);
     }
   };
 
@@ -122,9 +116,7 @@ const ApplicantDashboard = () => {
       await deleteAvailability(availabilityId);
       await loadData();
     } catch (error) {
-      console.error('Error removing availability:', error);
-      const message = error.response?.data?.error || 'Failed to remove availability';
-      setErrors([message]);
+      setErrors([error.userMessage]);
     }
   };
 
@@ -134,9 +126,7 @@ const ApplicantDashboard = () => {
       await submitApplication();
       await loadData();
     } catch (error) {
-      console.error('Error submitting application:', error);
-      const message = error.response?.data?.error || 'Failed to submit application';
-      setErrors([message]);
+      setErrors([error.userMessage]);
     }
   };
 
@@ -152,9 +142,7 @@ const ApplicantDashboard = () => {
       setIsEditing(false);
       await loadData();
     } catch (error) {
-      console.error('Error deleting application:', error);
-      const message = error.response?.data?.error || 'Failed to delete application';
-      setErrors([message]);
+      setErrors([error.userMessage]);
     }
   };
 
@@ -188,13 +176,7 @@ const ApplicantDashboard = () => {
         <p>Username: {user?.username}</p>
       </div>
 
-      {errors.length > 0 && (
-        <div style={{ backgroundColor: '#fee', border: '1px solid #fcc', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-          {errors.map((error, index) => (
-            <p key={index} style={{ color: '#c00', margin: 0 }}>{error}</p>
-          ))}
-        </div>
-      )}
+      <ErrorList errors={errors} />
 
       {hasSubmitted && (
         <div style={{ backgroundColor: '#fff', border: '1px solid #ddd', padding: '1.5rem', borderRadius: '4px', marginBottom: '2rem' }}>
