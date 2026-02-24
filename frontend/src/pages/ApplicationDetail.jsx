@@ -69,7 +69,7 @@ const ApplicationDetail = () => {
         <h3 style={{ marginTop: 0, marginBottom: '0.75rem' }}>Applicant</h3>
         <p style={{ margin: '0.25rem 0' }}><strong>Name:</strong> {person?.firstName} {person?.lastName}</p>
         <p style={{ margin: '0.25rem 0' }}><strong>Email:</strong> {person?.email}</p>
-        <p style={{ margin: '0.25rem 0' }}><strong>Person number:</strong> {person?.personNumber ?? '—'}</p>
+        <p style={{ margin: '0.25rem 0' }}><strong>Person number:</strong> {person?.personNumber ?? '-'}</p>
       </div>
 
       <div style={{ backgroundColor: '#fff', border: '1px solid #ddd', padding: '1.25rem', borderRadius: '4px', marginBottom: '1.5rem' }}>
