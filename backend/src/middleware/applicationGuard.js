@@ -1,4 +1,5 @@
 const ApplicationDAO = require('../integration/ApplicationDAO');
+const { ForbiddenError } = require('../util/errors');
 
 /**
  * Middleware to ensure application is in 'unhandled' status before allowing modifications
@@ -18,16 +19,13 @@ async function requireUnhandledApplication(req, res, next) {
     }
 
     if (application.status !== 'unhandled') {
-      return res.status(403).json({
-        error: `Application is ${application.status} and cannot be modified.`
-      });
+      return next(new ForbiddenError(`Application is ${application.status} and cannot be modified.`));
     }
 
     req.application = application;
     next();
   } catch (error) {
-    console.error('Error in requireUnhandledApplication middleware:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 }
 

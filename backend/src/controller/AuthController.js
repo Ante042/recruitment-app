@@ -72,7 +72,9 @@ async function login(req, res, next) {
       throw new ValidationError('Validation failed', validation.errors);
     }
 
-    const person = await PersonDAO.findByUsername(username);
+    const person = await sequelize.transaction(async (t) => {
+      return await PersonDAO.findByUsername(username, t);
+    });
 
     if (!person) {
       throw new UnauthorizedError('Invalid credentials');

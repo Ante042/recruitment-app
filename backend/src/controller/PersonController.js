@@ -12,7 +12,9 @@ const sequelize = require('../config/database');
  */
 async function getMyProfile(req, res, next) {
   try {
-    const person = await PersonDAO.findByIdWithProfiles(req.user.id);
+    const person = await sequelize.transaction(async (t) => {
+      return await PersonDAO.findByIdWithProfiles(req.user.id, t);
+    });
 
     if (!person) {
       throw new NotFoundError('Profile');
