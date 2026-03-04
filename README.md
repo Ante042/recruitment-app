@@ -2,7 +2,7 @@
 
 Recruitment application for KTH course IV1201. Built with Express.js (backend) and React (frontend).
 
-Live: https://recruitment-app-antf.onrender.com
+Live: [Render Website](https://recruitment-app-frontend.onrender.com/)
 
 ## Prerequisites
 
