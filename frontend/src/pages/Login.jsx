@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { validateLoginForm } from '../utils/validation';
 import FormInput from '../components/FormInput';
@@ -13,6 +13,7 @@ import Button from '../components/Button';
 const Login = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, login } = useAuth();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -69,6 +70,11 @@ const Login = () => {
       <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Login</h1>
 
       <form onSubmit={handleSubmit}>
+        {location.state?.message && (
+          <div style={{ backgroundColor: '#fff3cd', border: '1px solid #ffeeba', padding: '0.75rem', marginBottom: '1rem', borderRadius: '4px' }}>
+            {location.state.message}
+          </div>
+        )}
         <ErrorList errors={errors} />
 
         <FormInput
