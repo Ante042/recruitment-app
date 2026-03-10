@@ -20,9 +20,6 @@ const sequelize = new Sequelize(
       idle: 10000,
       evict: 5000,
     },
-    retry: {
-      max: 2,
-    },
   }
 );
 

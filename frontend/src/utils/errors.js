@@ -12,7 +12,7 @@ export function getErrorMessage(error) {
   if (!error) return 'An unknown error occurred.';
   if (error.response) {
     const { status, data } = error.response;
-    return data?.message || STATUS_MESSAGES[status] || `Error ${status}.`;
+    return data?.error || data?.message || STATUS_MESSAGES[status] || `Error ${status}.`;
   }
   if (error.request) return 'Network error - no response from server.';
   return error.message || 'An unexpected error occurred.';

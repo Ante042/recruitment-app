@@ -23,6 +23,16 @@ async function findByEmail(email, transaction = null) {
 }
 
 /**
+ * Find a person by person number
+ * @param {string} personNumber - The person number to search for
+ * @param {Object|null} transaction - Sequelize transaction
+ * @returns {Promise<Person|null>} The person or null if not found
+ */
+async function findByPersonNumber(personNumber, transaction = null) {
+  return await Person.findOne({ where: { personNumber }, transaction });
+}
+
+/**
  * Find a person by ID
  * @param {number} id - The person ID
  * @param {Object|null} transaction - Sequelize transaction
@@ -92,6 +102,7 @@ async function findByIdWithProfiles(personId, transaction = null) {
 module.exports = {
   findByUsername,
   findByEmail,
+  findByPersonNumber,
   findById,
   createPerson,
   findByIdWithProfiles

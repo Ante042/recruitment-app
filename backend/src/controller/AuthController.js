@@ -36,6 +36,11 @@ async function register(req, res, next) {
         throw new ConflictError('Email already exists');
       }
 
+      const existingPersonNumber = await PersonDAO.findByPersonNumber(personNumber, t);
+      if (existingPersonNumber) {
+        throw new ConflictError('Person number already exists');
+      }
+
       return await PersonDAO.createPerson({
         firstName, lastName, email, personNumber, username, passwordHash, role: 'applicant'
       }, t);
